@@ -68,27 +68,21 @@ function BookProductCard({
               }}
             >
               <Typography variant="h6" fontWeight="bold">
-                {title}
+                {title ?? 'No Title Found'}
               </Typography>
 
               <Typography color="text.secondary">
-                {author}
+                {author ?? 'No Author Found'}
               </Typography>
 
               <Typography color="text.secondary">
-                {genre}
+                {genre ?? 'No Genre Found'}
               </Typography>
             </Box>
           </Box>
 
           <Chip
-            label={
-              available_copies > 0
-                ? `${available_copies} ${
-                    available_copies === 1 ? 'Copy' : 'Copies'
-                  } Available`
-                : 'Unavailable'
-            }
+            label={available_copies > 0 ? (available_copies > 1 ? available_copies+' Copies Available' : '1 Copy Avaiable') : ('Unavailable')}
             color={available_copies > 0 ? 'success' : 'error'}
             sx={{ width: '100%' }}
           />

@@ -8,21 +8,25 @@ import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import QuizIcon from '@mui/icons-material/Quiz';
+import TableRowsIcon from '@mui/icons-material/TableRows';
 import AddIcon from '@mui/icons-material/Add';
 import {useState, useEffect} from 'react';
 function BooksEncode() {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [addBookOverlay, setAddBookOverlay] = useState(false);
-    const [addBookDialog, setAddBookDialog] = useState(false);
-    const [secondAddBookDialog, setSecondAddBookDialog] = useState(false);
+    const [addBookStep, setAddBookStep] = useState(1);
     const [genre, setGenre] = useState("All Genre");
     const [status, setStatus] = useState("All Status");
     const [books, setBooks] = useState([]);
+    const [shelves, setShelves] = useState([]);
     const [targetBook, setTargetBook] = useState("");
     const [editingBook, setEditingBook] = useState(null);
     const [createBookDraft, setCreateBookDraft] = useState(null);
     const [targetBookCopies, setTargetBookCopies] = useState({});
     const [bookInformationEditToggle, setBookInformationEditToggle] = useState(false);
+
+    {/* For physical copies */}
+    const [physicalCopies, setPhysicalCopies] = useState([]);
     const addBookTextFields = [
         {label: 'Title', placeholder: 'e.g. Atomic Haits', row: 1, value: 'title', required: true},
         {label: 'Author', placeholder: 'e.g. Jose Rizal', row: 2, value: 'author'},
@@ -33,7 +37,6 @@ function BooksEncode() {
         {label: 'Language', placeholder: 'e.g. English', row: 4, value: 'language'},
         {label: 'Description', type: 'textarea', placeholder: 'Enter a brief description of the book...', row: 5, value: 'description'},
     ];
-
     const addBookTFRows = Object.values(
     Object.groupBy(addBookTextFields, (textfield) => textfield.row)
     );
@@ -53,9 +56,39 @@ function BooksEncode() {
         setTargetBook(data);
     }
     async function loadBookCopies(id) {
-        const response = await fetch('http://localhost:3000/books/'+id+"/copies");
+        const response = await fetch('http://localhost:3000/bookCopy/'+id);
         const data = await response.json();
         setTargetBookCopies(data);
+    }
+    async function createBook() {
+        try {
+        const response = await fetch('http://localhost:3000/books/create', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(createBookDraft)
+        });
+        const data = await response.json();
+        if(response.ok) {
+            loadBooks();
+            setCreateBookDraft(null);
+            setSnackbarOpen(true);
+            await createBookCopies(data.book_id);
+        }
+        } catch(error) {
+            console.error(error);
+        }
+    }
+    async function createBookCopies(id) {
+        try { 
+        const response = await fetch('http://localhost:3000/bookCopy/'+id+'/create', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(physicalCopies)
+        });
+        if(response.ok) setSnackbarOpen(true);
+        } catch(error) {
+            console.error(error);
+        }
     }
     async function editBookInformation(id) {
         const response = await fetch('http://localhost:3000/books/'+id+'/edit', {
@@ -65,70 +98,191 @@ function BooksEncode() {
         });
         if(response.ok) {
             await loadBook(id);
+            loadBooks();
             setEditingBook(null);
             setSnackbarOpen(true);
         }
     }
-    useEffect(() => {
-        async function loadBooks() {
+    async function loadBooks() {
             const response = await fetch('http://localhost:3000/books')
             const data = await response.json();
             setBooks(data);
         }
-        loadBooks();
-    },[]);
-
+    async function loadShelves() {
+        const response = await fetch('http://localhost:3000/shelf')
+        const data = await response.json();
+        setShelves(data);
+    }
+    useEffect(() => {loadBooks()},[]);
+    useEffect(() => { loadShelves()},[]);
     return(
         <>
         {/* Add Dialog */}
-        {addBookOverlay && (<Box sx={{position: 'absolute', top: 0, left: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.5)', height: '100%', width: '100%', zIndex: 999}}>
-            {addBookDialog && (<Box sx={{bgcolor: '#FFFFFF', width: '50%', height: 'fit-content', p: 2, borderRadius: 2, display: 'flex', flexDirection: 'column', gap: 1}}>
-            <Box sx={{display: 'flex'}}>
-                <Typography variant="h6" sx={{flex: 1, fontWeight: 'bold'}}>Add Book</Typography>
-                <Button onClick={() => setAddBookOverlay(false)}>X</Button>
-            </Box>
-            <Typography>Enter the book's information and its physical copies</Typography>
-                <Box component="form" onSubmit={(e) => {e.preventDefault(); setSecondAddBookDialog(true); setAddBookDialog(false)}}>
-                ({ addBookDialog && addBookTFRows.map((row, rowIndex) => (
+        {addBookOverlay && (
+        <Box sx={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', bgcolor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999}}>
+            <Box sx={{width: '50%', borderRadius: 2, p: 2, bgcolor: '#FFFFFF'}}>
+                <Stack direction="row" sx={{alignItems: 'center'}}>
+                <Typography variant="h6" sx={{fontWeight: 'bold', width: '100%'}}>Add Book</Typography>
+                <Button onClick={() => {setAddBookOverlay(false); setAddBookStep(1); setCreateBookDraft(null); setPhysicalCopies([])}}>X</Button>
+                </Stack>
+                {addBookStep === 1 && (
                     <Box
-                        key={rowIndex}
-                        sx={{
-                            display: 'flex',
-                            gap: 2
-                        }}>
-                        {row.map((textfield, i) => (
+                        component="form"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            setAddBookStep(2);
+                        }}
+                    >
+                        {addBookTFRows.map((row, rowIndex) => (
                             <Box
-                                key={i}
+                                key={rowIndex}
                                 sx={{
-                                    flex: 1
-                                }}>
-                                <Typography sx={{fontWeight: 'bold'}}>
-                                    {textfield.label}
-                                </Typography>
-                                <CustomTextField
-                                    placeholder={textfield.placeholder}
-                                    required={textfield.required}
-                                    type={textfield.type}
-                                    fullWidth
-                                    onChange={(e) => {
-                                        setCreateBookDraft(prev => ({
-                                            ...prev,
-                                            [textfield.value]: e.target.value
-                                        }));
-                                    }}
-                                    sx={{height: 40}}
-                                />
+                                    display: 'flex',
+                                    gap: 2
+                                }}
+                            >
+                                {row.map((textfield, fieldIndex) => (
+                                    <Box
+                                        key={fieldIndex}
+                                        sx={{ flex: 1 }}
+                                    >
+                                        <Typography sx={{ fontWeight: 'bold' }}>
+                                            {textfield.label}
+                                        </Typography>
+
+                                        <CustomTextField
+                                            placeholder={textfield.placeholder}
+                                            type={textfield.type}
+                                            required={textfield.required}
+                                            fullWidth
+                                            onChange={(e) => {
+                                            setCreateBookDraft(prev => ({
+                                                ...prev,
+                                                [textfield.value]: e.target.value
+                                            }));
+                                        }}
+                                        />
+                                    </Box>
+                                ))}
                             </Box>
                         ))}
+
+                        <Stack
+                            direction="row"
+                            sx={{
+                                justifyContent: 'flex-end',
+                                mt: 2
+                            }}
+                        >
+                            <Button
+                                type="button"
+                                onClick={() => setAddBookOverlay(false)}
+                            >
+                                Cancel
+                            </Button>
+
+                            <Button
+                                type="submit"
+                                sx={{
+                                    bgcolor: 'accent.primary',
+                                    color: 'background.default'
+                                }}
+                            >
+                                Continue
+                            </Button>
+                        </Stack>
                     </Box>
-                ))}
-                <Stack direction="row" sx={{justifyContent: 'flex-end'}}>
-                    <Button onClick={() => setAddBookOverlay(false)}>Cancel</Button>
-                    <Button type="submit" sx={{bgcolor: 'accent.primary', color: 'background.default'}}>Continue</Button>
-                </Stack>)
-                {/* CONTINUE HERE, ADD SECOND STEP FOR PHYSICAL COPIES */}
-                </Box>
-            </Box>)}
+                )}
+                {addBookStep === 2 && (
+                    <Box
+                        component="form"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            createBook();
+                        }}>
+                    <Box>
+                        <Stack direction="row" sx={{gap: 2}}>
+                        <Box sx={{width: 115, height: 160, display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2, bgcolor: '#777777', borderRadius: 4}}>
+                        <AutoStoriesIcon/>
+                        </Box>
+
+                        <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                        <Typography variant="h6" sx={{fontWeight: 'bold'}}>{createBookDraft.title}</Typography>
+                        <Typography>{createBookDraft.author ?? 'No Author Submitted'}</Typography>
+                        <Typography variant="body2">
+                            {(createBookDraft.genre ?? 'No Genre Submitted') + ' • ' + (createBookDraft.publisher ?? 'No Publisher Submitted') + ' • ' + (createBookDraft.publication_year ?? 'No Publication Year Submitted')}
+                        </Typography>
+                        <Typography sx={{height: '100%', display: 'flex', alignItems: 'center'}}>{createBookDraft.description ?? 'No Description Submitted'}</Typography>
+                        </Box>
+                        
+                        </Stack>
+                    </Box>
+                    {/* Physical copies modifier */}
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
+                        <Typography variant="h6" sx={{fontWeight: 'bold'}}>Physical Copies</Typography>
+                        {/* Holder for copy rows */}
+                        <Box sx={{display: 'flex', flexDirection: 'column', height: 225, overflowY: 'auto', gap: 1, border: '1px dashed rgba(0,0,0,0.5)', borderRadius: 4, p: 1}}>
+                            {physicalCopies.length === 0 && (<EmptyState icon={<TableRowsIcon sx={{fontSize: 52}}/>} title="No copies added yet" description="Add your copies at your time, Librarian!"/>)}
+                            {physicalCopies.map((copy, i) => {
+                                return (
+                                    <Stack key={i} direction="row" sx={{bgcolor: '#ebebeb', height: 75, gap: 2, p: 2}}>
+                                        <Typography sx={{fontWeight: 'bold', display: 'flex', alignItems: 'center'}}>Copy {i + 1}</Typography>
+                                        <Stack sx={{flex: 1, justifyContent: 'center'}}>
+                                            <Typography>Shelf Location</Typography>
+                                            <Select
+                                                value={copy.shelf_location}
+                                                onChange={(e) => {
+                                                    setPhysicalCopies(prev =>
+                                                        prev.map((item, index) =>
+                                                            index === i
+                                                                ? { ...item, shelf_location: e.target.value }
+                                                                : item
+                                                        )
+                                                    );
+                                                }}
+                                                fullWidth required sx={{height: '75%', bgcolor: '#FFFFFF'}}>
+                                                {shelves.map((shelf) => (
+                                                    <MenuItem
+                                                        key={shelf.shelf_code}
+                                                        value={shelf.shelf_code}
+                                                    >
+                                                        {shelf.shelf_code}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </Stack>
+                                        <IconButton onClick={() => {setPhysicalCopies(prev => prev.filter((_, index) => index !== i))}} sx={{color: 'red'}}><DeleteIcon/></IconButton>
+                                    </Stack>
+                                )
+                            })}
+                        </Box>
+                        <Button onClick={() => {setPhysicalCopies(prev => [...prev,{shelf_location: ''}])}} sx={{width: '100%', bgcolor: 'accent.primary', color: 'background.default'}}>+ Add Copy</Button>
+                    </Box>
+                        <Stack
+                            direction="row"
+                            sx={{
+                                justifyContent: 'flex-end',
+                                mt: 2
+                            }}>
+                            <Button
+                                type="button"
+                                onClick={() => {setAddBookOverlay(false); setAddBookStep(1); setCreateBookDraft(null); setPhysicalCopies([])}}>
+                                Cancel
+                            </Button>
+
+                            <Button
+                                onClick={() => {createBook(); setAddBookOverlay(false); setAddBookStep(1); setCreateBookDraft(null); setPhysicalCopies([])}}
+                                type="submit"
+                                sx={{
+                                    bgcolor: 'accent.primary',
+                                    color: 'background.default'
+                                }}>
+                                Submit
+                            </Button>
+                        </Stack>
+                    </Box>
+                )}
+            </Box>
         </Box>)}
 
         {/* Main container */}
@@ -143,7 +297,7 @@ function BooksEncode() {
                     <Typography variant="subtitle1" sx={{color: '#777777'}}>Manage books and their physical copies</Typography>
                 </Box>
                 <Box sx={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
-                    <Button onClick={() => {setAddBookOverlay(true); setAddBookDialog(true)}} size="large" sx={{bgcolor: 'accent.primary', color: 'background.default'}}>+ Add Book</Button>
+                    <Button onClick={() => {setAddBookOverlay(true)}} size="large" sx={{bgcolor: 'accent.primary', color: 'background.default'}}>+ Add Book</Button>
                 </Box>
             </Box>
             
@@ -195,9 +349,9 @@ function BooksEncode() {
                     <AutoStoriesIcon/>
                     </Box>
                     <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                        <Typography variant="h6" sx={{fontWeight: 'bold'}}>{targetBook.title}</Typography>
-                        <Typography>{targetBook.author}</Typography>
-                        <Typography>{targetBook.genre}</Typography>
+                        <Typography variant="h6" sx={{fontWeight: 'bold'}}>{targetBook.title ?? 'No Title Found'}</Typography>
+                        <Typography>{targetBook.author ?? 'No Author Found'}</Typography>
+                        <Typography>{targetBook.genre ?? 'No Genre Found'}</Typography>
                     </Box>
                 </Box>
 
@@ -212,16 +366,16 @@ function BooksEncode() {
 
                 {/* Book information */}
                 <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
-                    {bookInformationRows.map(element => {
+                    {bookInformationRows.map((element, i) => {
                         return(
-                            <Box sx={{display: 'flex'}}>
+                            <Box key={i} sx={{display: 'flex'}}>
                                 <Typography sx={{flex: 1, color: '#777777'}}>{element.label}</Typography>
                                 {bookInformationEditToggle ? (<CustomTextField type={element.value === 'publication_year' ? 'number' : 'text'}
                                 onChange={(e) => {setEditingBook(prev => (
                                     {...prev, 
                                         [element.value]: e.target.value
                                     }
-                                    ))}} disabled={!element.editable} value={editingBook?.[element.value] ?? ''} sx={{flex: 1, height: 30}}/>) : (<Typography sx={{flex: 1}}>{targetBook[element.value]}</Typography>)}
+                                    ))}} disabled={!element.editable} value={editingBook?.[element.value] ?? ''} sx={{flex: 1, height: 30}}/>) : (<Typography sx={{flex: 1, fontStyle: targetBook[element.value] === null && 'italic'}}>{targetBook[element.value] ?? 'No '+element.label+' Found'}</Typography>)}
                             </Box>
                         )
                     })}
