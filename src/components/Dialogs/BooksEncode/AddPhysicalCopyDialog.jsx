@@ -18,7 +18,7 @@ import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TableRowsIcon from "@mui/icons-material/TableRows";
 import CustomTextField from "../../CustomTextField";
-import EmptyState from "../../EmptyState";
+import StateDialog from "../../StateDialog";
 
 function AddPhysicalCopyDialog({ open, onClose, onCreate, targetBook }) {
   function handleClose() {
@@ -154,7 +154,7 @@ function AddPhysicalCopyDialog({ open, onClose, onCreate, targetBook }) {
               }}
             >
               {physicalCopies.length === 0 && (
-                <EmptyState
+                <StateDialog
                   icon={<TableRowsIcon sx={{ fontSize: 52 }} />}
                   title="No copies added yet"
                   description="Copies added here will be placed alongside your currently existing copies"

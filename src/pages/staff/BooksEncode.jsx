@@ -1,11 +1,11 @@
-import * as booksApi from "../api/booksApi";
-import * as bookCopiesApi from "../api/bookCopiesApi";
-import * as shelvesApi from "../api/shelvesApi";
-import AddBookDialog from "../components/Dialogs/BooksEncode/AddBookDialog";
-import DeleteBookDialog from "../components/Dialogs/BooksEncode/DeleteBookDialog";
-import AddPhysicalCopyDialog from "../components/Dialogs/BooksEncode/AddPhysicalCopyDialog";
-import EditPhysicalCopyDialog from "../components/Dialogs/BooksEncode/EditPhysicalCopyDialog";
-import DeletePhysicalCopyDialog from "../components/Dialogs/BooksEncode/DeletePhysicalCopyDialog";
+import * as booksApi from "../../api/booksApi";
+import * as bookCopiesApi from "../../api/bookCopiesApi";
+import * as shelvesApi from "../../api/shelvesApi";
+import AddBookDialog from "../../components/Dialogs/BooksEncode/AddBookDialog";
+import DeleteBookDialog from "../../components/Dialogs/BooksEncode/DeleteBookDialog";
+import AddPhysicalCopyDialog from "../../components/Dialogs/BooksEncode/AddPhysicalCopyDialog";
+import EditPhysicalCopyDialog from "../../components/Dialogs/BooksEncode/EditPhysicalCopyDialog";
+import DeletePhysicalCopyDialog from "../../components/Dialogs/BooksEncode/DeletePhysicalCopyDialog";
 import {
   Box,
   Typography,
@@ -26,10 +26,10 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import CustomTextField from "../components/CustomTextField";
-import BookProductCard from "../components/BookProductCard";
+import CustomTextField from "../../components/CustomTextField";
+import BookProductCard from "../../components/BookProductCard";
 import PendingIcon from "@mui/icons-material/Pending";
-import EmptyState from "../components/EmptyState";
+import StateDialog from "../../components/StateDialog";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -208,7 +208,7 @@ function BooksEncode() {
             sx={{ flex: 1, display: "flex", alignItems: "flex-start", gap: 1 }}
           >
             {books.length === 0 ? (
-              <EmptyState
+              <StateDialog
                 icon={<QuizIcon sx={{ fontSize: 52 }} />}
                 title="No book records found"
                 description="Start by adding your first book."
@@ -253,7 +253,7 @@ function BooksEncode() {
           }}
         >
           {targetBook === "" ? (
-            <EmptyState
+            <StateDialog
               icon={<PendingIcon sx={{ fontSize: 52 }} />}
               title="No book selected yet"
               description="Selected book information will appear here."

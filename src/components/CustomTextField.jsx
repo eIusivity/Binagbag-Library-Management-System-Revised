@@ -1,20 +1,17 @@
-import { TextField } from '@mui/material';
+import { TextField } from "@mui/material";
 
-function CustomTextField({ sx, ...props}) {
+function CustomTextField({ sx, ...props }) {
   return (
     <TextField
       {...props}
-      slotProps={{
-        htmlInput: {autoomplete: 'off'}
-      }}
       sx={{
-        bgcolor: '#FFFFFF',
+        bgcolor: "#FFFFFF",
         borderRadius: 4,
-        '& .MuiOutlinedInput-root': {
+        "& .MuiOutlinedInput-root": {
           borderRadius: 4,
-          height: '100%',
+          height: "100%",
         },
-        
+
         ...sx,
       }}
     />

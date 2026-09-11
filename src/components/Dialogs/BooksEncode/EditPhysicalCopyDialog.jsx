@@ -18,7 +18,7 @@ import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TableRowsIcon from "@mui/icons-material/TableRows";
 import CustomTextField from "../../CustomTextField";
-import EmptyState from "../../EmptyState";
+import StateDialog from "../../StateDialog";
 
 function EditPhysicalCopyDialog({
   open,
