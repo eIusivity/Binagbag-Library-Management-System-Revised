@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000/books";
+import { BASE_URL } from "./apiConfig.js";
 
 export async function getBooks() {
   const response = await fetch(BASE_URL);

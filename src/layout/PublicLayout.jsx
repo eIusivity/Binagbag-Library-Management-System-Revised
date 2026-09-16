@@ -8,9 +8,10 @@ function PublicLayout() {
     <Box
       sx={{
         display: "flex",
+        flexDirection: "column",
         minHeight: "100vh",
         width: "100%",
-        px: { xs: 2, md: 8 },
+        bgcolor: "white",
       }}
     >
       <Outlet />

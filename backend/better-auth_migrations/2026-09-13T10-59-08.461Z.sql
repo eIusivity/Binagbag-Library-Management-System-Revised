@@ -1,0 +1,1 @@
+alter table `user` add column `role` text default 'Patron' not null;

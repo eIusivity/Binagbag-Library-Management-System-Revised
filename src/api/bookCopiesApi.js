@@ -1,6 +1,4 @@
-import { responsiveFontSizes } from "@mui/material";
-
-const BASE_URL = "http://localhost:3000/bookCopy";
+import { BASE_URL } from "./apiConfig.js";
 
 export async function getBookCopies(bookId) {
   const response = await fetch(`${BASE_URL}/${bookId}`);

@@ -46,7 +46,7 @@ export async function createUser(req, res) {
         emptyToNull(user_type),
       ],
     );
-
+    const librarians = await getUserByRoles("Librarian");
     res.status(201).json({
       message: "Registration submitted successfully",
       user_record_id: result.insertId,
@@ -79,7 +79,7 @@ export async function getUser(req, res) {
     created_at,
     approved_at
    FROM users
-   WHERE user_record_id = ? OR patron_id = ?`,
+   WHERE user_record_id = ? OR patron_id = ? OR role = ?`,
       [req.params.id, req.params.id],
     );
     if (rows.length === 0) {
@@ -93,4 +93,11 @@ export async function getUser(req, res) {
       message: "Failed to get book copy",
     });
   }
+}
+export async function getUsersByRole(role) {
+  const [rows] = await db.query("SELECT patron_id FROM users WHERE role = ?", [
+    role,
+  ]);
+
+  return rows;
 }

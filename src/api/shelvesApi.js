@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000/shelf";
+import { BASE_URL } from "./apiConfig.js";
 
 export async function getShelves() {
   const response = await fetch(BASE_URL);

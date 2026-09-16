@@ -1,6 +1,6 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 
-function StateDialog({ icon, title, description, action }) {
+function StateDialog({ icon, title, description, action, actionLabel }) {
   return (
     <Box
       sx={{
@@ -18,7 +18,19 @@ function StateDialog({ icon, title, description, action }) {
         {title}
       </Typography>
       <Typography sx={{ color: "#777777" }}>{description}</Typography>
-      {action}
+      {action && (
+        <Button
+          sx={{
+            width: "25%",
+            p: 2,
+            bgcolor: "primary.main",
+            color: "background.default",
+          }}
+          onClick={() => action()}
+        >
+          {actionLabel}
+        </Button>
+      )}
     </Box>
   );
 }
