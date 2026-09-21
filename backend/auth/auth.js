@@ -1,6 +1,8 @@
 import "dotenv/config";
 import { betterAuth } from "better-auth";
 import { createPool } from "mysql2/promise";
+import { admin } from "better-auth/plugins";
+import { ac, patron, librarian, administrator } from "./permission.js";
 import bcrypt from "bcrypt";
 
 export const auth = betterAuth({
@@ -47,4 +49,15 @@ export const auth = betterAuth({
       },
     },
   },
+  plugins: [
+    admin({
+      ac,
+      roles: {
+        Patron: patron,
+        Librarian: librarian,
+        Administrator: administrator,
+      },
+      defaultRole: "Patron",
+    }),
+  ],
 });

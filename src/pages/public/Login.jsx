@@ -20,6 +20,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { socket } from "../../socket";
 
 function Login() {
   const [userInfo, setUserInfo] = useState({
@@ -41,18 +42,10 @@ function Login() {
         email: userInfo.email,
         password: userInfo.password,
       });
-      if (error) {
-        setLoginError(error.message || "Sign in failed. Please try again.");
-      }
     } catch (error) {
       setLoginError("Unable to reach the server. Please try again.");
     } finally {
       setIsLoggingIn(false);
-    }
-
-    if (error) {
-      setLoginError(error.message);
-      return;
     }
   }
 

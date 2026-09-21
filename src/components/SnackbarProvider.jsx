@@ -47,7 +47,6 @@ export function SnackbarProvider({ children }) {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-      ;
     </SnackbarContext.Provider>
   );
 }

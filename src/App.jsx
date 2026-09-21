@@ -12,6 +12,9 @@ import Login from "./pages/public/Login";
 import Dashboard from "./pages/staff/Dashboard";
 import Home from "./pages/public/Home";
 import LandingPage from "./pages/public/LandingPage";
+import PendingUserDetails from "./pages/staff/PendingUserDetails";
+import UserSearch from "./pages/staff/Users/UserSearch";
+import Users from "./pages/staff/Users/Users";
 function App() {
   const { triggerSnackbar } = useSnackbar();
   useEffect(() => {
@@ -23,9 +26,9 @@ function App() {
         action: notification.action,
       });
     }
-    socket.on("new-registration", handleSnackbar);
+    socket.on("snackbar", handleSnackbar);
     return () => {
-      socket.off("new-registration", handleSnackbar);
+      socket.off("snackbar", handleSnackbar);
     };
   }, [triggerSnackbar]);
   return (
@@ -65,6 +68,9 @@ function App() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/encodebook" element={<BooksEncode />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/users/search" element={<UserSearch />} />
+          <Route path="/pendingUserDetails" element={<PendingUserDetails />} />
         </Route>
       </Routes>
     </>

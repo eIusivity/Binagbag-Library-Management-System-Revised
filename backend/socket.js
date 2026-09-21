@@ -9,8 +9,27 @@ export function initializeSocket(httpServer) {
       credentials: true,
     },
   });
-
+  const onlineUsers = new Map();
   io.on("connection", async (socket) => {
+    socket.on("user:online", (userId) => {
+      socket.userId = userId;
+      if (!onlineUsers.has(userId)) {
+        onlineUsers.set(userId, new Set());
+      }
+
+      onlineUsers.get(userId).add(socket.id);
+    });
+
+    socket.on("disconnect", () => {
+      const userId = socket.userId;
+      if (!userId) return;
+      const sockets = onlineUsers.get(userId);
+      sockets?.delete(socket.id);
+      if (sockets?.size === 0) {
+        onlineUsers.delete(userId);
+      }
+    });
+
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(socket.request.headers),
     });
@@ -19,7 +38,6 @@ export function initializeSocket(httpServer) {
       return;
     }
     socket.join(session.user.role);
-    console.log(`${session.user.name} joined ${session.user.role}`);
   });
 }
 export function getIO() {

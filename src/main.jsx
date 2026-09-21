@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { socket } from "./socket.js";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider, CssBaseline } from "@mui/material";
+import { AccessProvider } from "./context/AccessProvider.jsx";
 import App from "./App.jsx";
 import theme from "./theme/theme";
 import { AuthProvider } from "./auth/AuthProvider.jsx";
@@ -14,7 +15,9 @@ createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <AuthProvider>
           <SnackbarProvider>
-            <App />
+            <AccessProvider>
+              <App />
+            </AccessProvider>
           </SnackbarProvider>
         </AuthProvider>
       </BrowserRouter>

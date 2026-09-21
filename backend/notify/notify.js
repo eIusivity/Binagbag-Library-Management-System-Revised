@@ -36,7 +36,7 @@ export async function createNotification(notification) {
 
     await connection.commit();
 
-    getIO().to("Librarian").emit("new-registration", {
+    getIO().to("Librarian").emit("snackbar", {
       title: notification.title,
       content: notification.content,
       severity: "info",
