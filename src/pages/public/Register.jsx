@@ -41,10 +41,13 @@ function Register() {
         {
           email: userInfo.email,
           password: userInfo.password,
-          name: `${userInfo.first_name} ${
-            userInfo.middle_name ?? ""
-          } ${userInfo.last_name}`,
+          name: [userInfo.first_name, userInfo.middle_name, userInfo.last_name]
+            .filter(Boolean)
+            .join(" "),
           user_type: userInfo.user_type,
+          first_name: userInfo.first_name,
+          middle_name: userInfo.middle_name ?? "",
+          last_name: userInfo.last_name,
         },
         {
           onSuccess: async (ctx) => {

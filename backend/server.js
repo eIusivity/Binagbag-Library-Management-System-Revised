@@ -11,6 +11,11 @@ import shelfRoutes from "./routes/shelfRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import imageRoutes from "./routes/imageRoutes.js";
 import notifyRoutes from "./routes/notifyRoutes.js";
+import loanRoutes from "./routes/loanRoutes.js";
+import reservationRoutes from "./routes/reservationRoutes.js";
+import visitRoutes from "./routes/visitRoutes.js";
+import catalogRoutes from "./routes/catalogRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -18,7 +23,7 @@ const httpServer = createServer(app);
 initializeSocket(httpServer);
 app.use(
   cors({
-    origin: "http://192.168.1.6:5173",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   }),
 );
@@ -31,6 +36,11 @@ app.use("/bookCopy", bookCopyRoutes);
 app.use("/user", userRoutes);
 app.use("/image", imageRoutes);
 app.use("/notification", notifyRoutes);
+app.use("/loans", loanRoutes);
+app.use("/reservations", reservationRoutes);
+app.use("/visits", visitRoutes);
+app.use("/category", catalogRoutes);
+app.use("/report", reportRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.get("/", (req, res) => {

@@ -6,7 +6,17 @@ import { ac, patron, librarian, administrator } from "./permission.js";
 import bcrypt from "bcrypt";
 
 export const auth = betterAuth({
-  trustedOrigins: ["http://192.168.1.6:5173"],
+  baseURL: process.env.BETTER_AUTH_URL,
+
+  trustedOrigins: [process.env.CLIENT_URL],
+
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+    },
+  },
   database: createPool({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -33,6 +43,32 @@ export const auth = betterAuth({
         required: true,
         defaultValue: "Pending",
         input: false,
+      },
+      status_reason: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+      first_name: {
+        type: "string",
+        required: true,
+        input: true,
+      },
+      middle_name: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+      last_name: {
+        type: "string",
+        required: true,
+        input: true,
+      },
+      library_id: {
+        type: "string",
+        required: false,
+        input: false,
+        unique: true,
       },
     },
   },

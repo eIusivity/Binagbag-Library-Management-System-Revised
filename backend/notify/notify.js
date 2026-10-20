@@ -42,7 +42,7 @@ export async function createNotification(notification) {
       severity: "info",
       action: "ACCOUNT_REGISTRATION",
     });
-
+    getIO().to("Librarian").emit("new-registration");
     return {
       notification_id: notificationId,
       message: "Notification created successfully!",

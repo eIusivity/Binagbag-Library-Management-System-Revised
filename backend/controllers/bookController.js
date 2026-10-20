@@ -3,14 +3,41 @@ import db from "../config/db.js";
 const emptyToNull = (value) => {
   return typeof value === "string" && value.trim() === "" ? null : value;
 };
-
 export async function getBooks(req, res) {
+  //Took my time to write this comment, so that in the future once I review this code again, I don't get daunted by the amount of ternary operators
   try {
+    const { search = "", page = 1 } = req.query;
+    const limit = 6;
+    const offset = (Math.max(Number(page) || 1, 1) - 1) * limit; //Ensures that only numbers are sent on the params and it does not go below 1
+
+    //Here we grab the rows according to what the user searched, no search (&&) then we just return all the books
     const [rows] = await db.query(
-      "SELECT * FROM book_info WHERE deleted_at IS NULL",
+      `SELECT * FROM book_info WHERE deleted_at IS NULL ${search.trim() && `AND (title LIKE ? OR author LIKE ? OR book_id LIKE ?)`} LIMIT ? OFFSET ? `,
+      [
+        ...(search.trim()
+          ? [`%${search.trim()}%`, `%${search.trim()}%`, `%${search.trim()}%`]
+          : []),
+        limit,
+        offset,
+      ],
     );
-    res.json(rows);
+    //We then grab how many books in total were fetched, this is necessary to create pagination and determine how many pagination buttons we must render
+    const [count] = await db.query(
+      `SELECT COUNT(*) AS total FROM book_info WHERE deleted_at IS NULL ${search.trim() && `AND (title LIKE ? OR author LIKE ? OR book_id LIKE ?)`}`,
+      [
+        ...(search.trim()
+          ? [`%${search.trim()}%`, `%${search.trim()}%`, `%${search.trim()}%`]
+          : []),
+      ],
+    );
+    const total = count[0].total;
+    res.json({
+      books: rows,
+      total: total,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Failed to get books",
     });
@@ -23,6 +50,11 @@ export async function getBook(req, res) {
       "SELECT * FROM book_info WHERE book_id = ? AND deleted_at IS NULL",
       [req.params.id],
     );
+    if (rows.length === 0) {
+      return res.status(400).json({
+        message: "Book not found",
+      });
+    }
     res.json(rows[0]);
   } catch (error) {
     res.status(500).json({

@@ -12,15 +12,15 @@ import {
   Stack,
   Divider,
 } from "@mui/material";
+import { NavLink } from "react-router-dom";
 import CustomTextField from "./CustomTextField.jsx";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
-import PersonIcon from "@mui/icons-material/Person";
 import Logo from "../assets/Logo.png";
 import { useEffect, useState } from "react";
 import { useSnackbar } from "../components/SnackbarProvider.jsx";
 import { authClient } from "../auth/authClient.js";
+import { useAuth } from "../auth/AuthProvider.jsx";
 import {
   getUnreadNotificationCount,
   markNotificationAsRead,
@@ -28,6 +28,7 @@ import {
 import { getNotifications } from "../api/notifyApi.js";
 import { socket } from "../socket.js";
 function Header() {
+  const { user } = useAuth();
   const { data } = authClient.useSession();
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [notificationAnchor, setNotificationAnchor] = useState(null);
@@ -57,12 +58,6 @@ function Header() {
         </Badge>
       ),
       action: openNotificationPopover,
-    },
-    {
-      symbol: <ChatBubbleIcon />,
-    },
-    {
-      symbol: <PersonIcon />,
     },
   ];
 
@@ -147,6 +142,8 @@ function Header() {
           {notifications.map((notif) => (
             <ListItemButton
               key={notif.notification_id}
+              component={NavLink}
+              to={`/pendingUserDetails/${notif.reference_id}`}
               sx={{
                 px: 2,
                 py: 1.25,
@@ -260,6 +257,31 @@ function Header() {
               </IconButton>
             );
           })}
+          <Stack sx={{ alignItems: "flex-start" }}>
+            <Typography sx={{ color: "white", fontWeight: "bold" }}>
+              {user.name}
+            </Typography>
+
+            <Typography sx={{ color: "white", fontSize: 13 }}>
+              {user.role}
+            </Typography>
+            <Button
+              onClick={async () => await authClient.signOut()}
+              sx={{
+                color: "white",
+                textTransform: "none",
+                fontSize: 12,
+                p: 0,
+                minWidth: 0,
+                "&:hover": {
+                  bgcolor: "transparent",
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Sign out
+            </Button>
+          </Stack>
         </Box>
       </Box>
     </>

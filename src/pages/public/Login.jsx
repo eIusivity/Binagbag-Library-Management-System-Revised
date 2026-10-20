@@ -21,6 +21,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { socket } from "../../socket";
+import { incrementVisit } from "../../api/visitsApi";
 
 function Login() {
   const [userInfo, setUserInfo] = useState({
@@ -42,6 +43,14 @@ function Login() {
         email: userInfo.email,
         password: userInfo.password,
       });
+
+      if (data?.user?.role === "Patron") {
+        try {
+          await incrementVisit();
+        } catch (error) {
+          console.error("Failed to record visit:", error);
+        }
+      }
     } catch (error) {
       setLoginError("Unable to reach the server. Please try again.");
     } finally {

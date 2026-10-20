@@ -1,17 +1,18 @@
 import { BASE_URL } from "./apiConfig.js";
 
 export async function getBookCopies(bookId) {
-  const response = await fetch(`${BASE_URL}/${bookId}`);
+  const response = await fetch(`${BASE_URL}/bookCopy/${bookId}`);
   if (!response.ok) throw new Error("Failed to load book copies");
   return response.json();
 }
 export async function getBookCopy(bookId, bookCopyId) {
-  const response = await fetch(`${BASE_URL}/${bookId}/${bookCopyId}`);
-  if (!response.ok) throw new Error("Failed to load book copy");
-  return response.json();
+  const response = await fetch(`${BASE_URL}/bookCopy/${bookId}/${bookCopyId}`);
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message);
+  return data;
 }
 export async function createBookCopies(bookId, copies) {
-  const response = await fetch(`${BASE_URL}/${bookId}/create`, {
+  const response = await fetch(`${BASE_URL}/bookCopy/${bookId}/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -23,7 +24,7 @@ export async function createBookCopies(bookId, copies) {
   return data;
 }
 export async function updateBookCopy(bookCopyId, copy) {
-  const response = await fetch(`${BASE_URL}/${bookCopyId}/edit`, {
+  const response = await fetch(`${BASE_URL}/bookCopy/${bookCopyId}/edit`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(copy),
@@ -33,7 +34,7 @@ export async function updateBookCopy(bookCopyId, copy) {
   return data;
 }
 export async function deleteBookCopy(bookCopyId) {
-  const response = await fetch(`${BASE_URL}/${bookCopyId}/delete`, {
+  const response = await fetch(`${BASE_URL}/bookCopy/${bookCopyId}/delete`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
   });

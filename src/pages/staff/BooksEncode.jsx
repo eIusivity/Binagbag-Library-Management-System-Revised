@@ -17,6 +17,7 @@ import {
   ListItemText,
   IconButton,
   Stack,
+  Pagination,
 } from "@mui/material";
 import {
   Table,
@@ -35,14 +36,21 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import QuizIcon from "@mui/icons-material/Quiz";
 import AddIcon from "@mui/icons-material/Add";
+import BarcodeReaderIcon from "@mui/icons-material/BarcodeReader";
 import { useState, useEffect } from "react";
+import ManageCopyBarcodes from "../../components/Dialogs/BooksEncode/ManageCopyBarcodes";
 function BooksEncode() {
+  const [prompt, setPrompt] = useState("");
+  const [paginationCount, setPaginationCount] = useState(0);
+  const [paginationOffset, setPaginationOffset] = useState(0);
   useEffect(() => {
     (async () => {
-      const books = await booksApi.getBooks();
-      setBooks(books);
+      const books = await booksApi.getBooks(prompt, paginationOffset);
+      setBooks(books.books);
+      setPaginationCount(books.totalPages); //total pages of how many books were fetched, 6 books equal a page, not the actual pages of a literal book
+      console.log(books.totalPages);
     })();
-  }, []);
+  }, [prompt, paginationOffset]);
   const [activeDialog, setActiveDialog] = useState(null);
   const [genre, setGenre] = useState("All Genre");
   const [status, setStatus] = useState("All Status");
@@ -67,11 +75,16 @@ function BooksEncode() {
 
   return (
     <>
+      <ManageCopyBarcodes
+        open={activeDialog === "manage barcode"}
+        onClose={() => setActiveDialog(null)}
+        bookId={targetBook.book_id}
+      />
       <AddBookDialog
         open={activeDialog === "add book"}
         onClose={() => setActiveDialog(null)}
         onCreate={async () => {
-          const books = await booksApi.getBooks();
+          const books = await booksApi.getBooks(prompt);
           setBooks(books);
         }}
       />
@@ -79,7 +92,7 @@ function BooksEncode() {
         open={activeDialog === "delete book"}
         onClose={() => setActiveDialog(null)}
         onDelete={async () => {
-          const books = await booksApi.getBooks();
+          const books = await booksApi.getBooks(prompt);
           setBooks(books);
           setTargetBook("");
         }}
@@ -177,6 +190,7 @@ function BooksEncode() {
             <CustomTextField
               fullWidth
               placeholder="Search by title, author, Book ID, or publisher..."
+              onChange={(e) => setPrompt(e.target.value)}
             />
             <Select
               sx={{
@@ -205,36 +219,64 @@ function BooksEncode() {
 
           {/* Main frame for product cards */}
           <Box
-            sx={{ flex: 1, display: "flex", alignItems: "flex-start", gap: 1 }}
+            sx={{
+              flex: 1,
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 1,
+              flexDirection: "column",
+            }}
           >
-            {books.length === 0 ? (
-              <StateDialog
-                icon={<QuizIcon sx={{ fontSize: 52 }} />}
-                title="No book records found"
-                description="Start by adding your first book."
-              />
-            ) : (
-              books.map((book) => {
-                return (
-                  <BookProductCard
-                    key={book.book_id}
-                    title={book.title}
-                    author={book.author}
-                    genre={book.genre}
-                    total_copies={book.total_copies}
-                    available_copies={book.available_copies}
-                    onClick={() => {
-                      (async () => {
-                        setTargetBook(await booksApi.getBook(book.book_id));
-                        setTargetBookCopies(
-                          await bookCopiesApi.getBookCopies(book.book_id),
-                        );
-                      })();
-                    }}
-                  />
-                );
-              })
-            )}
+            <Box
+              sx={{
+                flex: 1,
+                width: "100%",
+                display: "flex",
+                flexWrap: "wrap",
+                alignContent: "flex-start",
+                gap: 1.25,
+              }}
+            >
+              {books.length === 0 ? (
+                <StateDialog
+                  icon={<QuizIcon sx={{ fontSize: 52 }} />}
+                  title="No book records found"
+                  description="Start by adding your first book."
+                />
+              ) : (
+                books.map((book) => {
+                  return (
+                    <BookProductCard
+                      key={book.book_id}
+                      title={book.title}
+                      author={book.author}
+                      genre={book.genre}
+                      total_copies={book.total_copies}
+                      available_copies={book.available_copies}
+                      onClick={() => {
+                        (async () => {
+                          setTargetBook(await booksApi.getBook(book.book_id));
+                          setTargetBookCopies(
+                            await bookCopiesApi.getBookCopies(book.book_id),
+                          );
+                        })();
+                      }}
+                    />
+                  );
+                })
+              )}
+            </Box>
+            <Pagination
+              count={paginationCount}
+              variant="outlined"
+              shape="rounded"
+              color="primary"
+              sx={{
+                display: paginationCount === 0 ? "none" : "block",
+                alignItems: "center",
+              }}
+              onChange={(e, page) => setPaginationOffset(page - 1)}
+            />
           </Box>
         </Box>
 
@@ -322,26 +364,49 @@ function BooksEncode() {
                   <Typography variant="h6" sx={{ flex: 1, fontWeight: "bold" }}>
                     Book Information
                   </Typography>
-                  <ListItemButton
-                    onClick={() => {
-                      setBookInformationEditToggle(!bookInformationEditToggle);
-                      setEditingBook({ ...targetBook });
-                    }}
-                    sx={{
-                      flex: 1,
-                      alignItems: "center",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <ListItemIcon>
-                      {
-                        <EditIcon
-                          sx={{ color: "text.primary", fontSize: 24 }}
-                        />
-                      }
-                    </ListItemIcon>
-                    <ListItemText primary="Edit" sx={{ flex: "none" }} />
-                  </ListItemButton>
+                  <Stack>
+                    <ListItemButton
+                      onClick={() => {
+                        setBookInformationEditToggle(
+                          !bookInformationEditToggle,
+                        );
+                        setEditingBook({ ...targetBook });
+                      }}
+                      sx={{
+                        flex: 1,
+                        alignItems: "center",
+                      }}
+                    >
+                      <ListItemIcon>
+                        {
+                          <EditIcon
+                            sx={{ color: "text.primary", fontSize: 22 }}
+                          />
+                        }
+                      </ListItemIcon>
+                      <ListItemText primary="Edit" sx={{ flex: "none" }} />
+                    </ListItemButton>
+                    <ListItemButton
+                      onClick={() => setActiveDialog("manage barcode")}
+                      sx={{
+                        flex: 1,
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <ListItemIcon>
+                        {
+                          <BarcodeReaderIcon
+                            sx={{ color: "text.primary", fontSize: 22 }}
+                          />
+                        }
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Manage Barcodes"
+                        sx={{ flex: "none" }}
+                      />
+                    </ListItemButton>
+                  </Stack>
                 </Box>
 
                 {/* Book information */}
@@ -480,7 +545,7 @@ function BooksEncode() {
                                       copy.copy_id,
                                     );
 
-                                  setTargetCopy(copyData);
+                                  setTargetCopy(copyData.data);
                                   setActiveDialog("edit physical copy");
 
                                   console.log(copyData);
@@ -497,7 +562,7 @@ function BooksEncode() {
                                       copy.copy_id,
                                     );
 
-                                  setTargetCopy(copyData);
+                                  setTargetCopy(copyData.data);
                                   setActiveDialog("delete physical copy");
                                 }}
                               >

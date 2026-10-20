@@ -5,7 +5,7 @@ let io;
 export function initializeSocket(httpServer) {
   io = new Server(httpServer, {
     cors: {
-      origin: "http://192.168.1.6:5173",
+      origin: process.env.CLIENT_URL,
       credentials: true,
     },
   });

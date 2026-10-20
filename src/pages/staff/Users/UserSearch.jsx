@@ -58,10 +58,10 @@ function UserSearch() {
       sx={{
         flex: 1,
         minWidth: 0, // VERY important inside flex layouts
-        width: "100%",
         p: 2,
         display: "flex",
         flexDirection: "column",
+        borderSizing: "border-box",
         overflow: "hidden",
       }}
     >
@@ -105,18 +105,18 @@ function UserSearch() {
       />
       <Stack
         direction="row"
-        spacing={2}
         useFlexGap
         sx={{
           flex: 1,
           py: 2,
 
           // Important
-          width: "100%",
           minWidth: 0,
           flexWrap: "wrap",
           justifyContent: "center",
           alignContent: "flex-start",
+          boxSizing: "border-box",
+          gap: 2,
         }}
       >
         {prompt.trim().length === 0 && (
@@ -157,6 +157,8 @@ function UserSearch() {
               <Card
                 key={user.id}
                 variant="outlined"
+                component={NavLink}
+                to={`/users/${user.id}`}
                 sx={{
                   width: 320,
                   maxWidth: "100%",
@@ -172,7 +174,6 @@ function UserSearch() {
                   borderColor: "divider",
                   boxShadow: "none",
                   cursor: "pointer",
-
                   "&:hover": {
                     borderColor: "primary.main",
                     boxShadow: "0 3px 12px rgba(0, 0, 0, 0.06)",

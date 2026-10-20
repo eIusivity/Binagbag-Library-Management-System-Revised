@@ -33,6 +33,7 @@ export function SnackbarProvider({ children }) {
         onClose={() => setSnackbarOpen(false)}
         action={snackbarAction}
         sx={{
+          border: "2 solid black",
           display: "inline",
           position: "absolute",
           zIndex: 999,

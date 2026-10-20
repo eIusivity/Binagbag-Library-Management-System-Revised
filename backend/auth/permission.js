@@ -9,7 +9,7 @@ export const patron = ac.newRole({
 });
 
 export const librarian = ac.newRole({
-  user: ["list", "get", "update"],
+  user: ["list", "get", "update", "ban", "delete", "set-password"],
   session: [],
 });
 

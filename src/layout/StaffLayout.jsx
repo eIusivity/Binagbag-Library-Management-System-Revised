@@ -10,7 +10,7 @@ function StaffLayout() {
     <Box
       sx={{
         display: "flex",
-        width: "100vw",
+        width: "100%",
         height: "100vh",
         flexDirection: "column",
         bgcolor: "#ececee",
@@ -18,9 +18,21 @@ function StaffLayout() {
     >
       <Header />
 
-      <Box sx={{ flex: 1, display: "flex" }}>
+      <Box sx={{ flex: 1, display: "flex", minHeight: 0 }}>
         <Sidebar />
-        <Outlet />
+
+        <Box sx={{ flex: 1, minWidth: 0, overflow: "auto" }}>
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              ml: "64px",
+              overflow: "auto",
+            }}
+          >
+            <Outlet />
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
