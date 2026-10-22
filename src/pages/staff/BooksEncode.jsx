@@ -52,8 +52,6 @@ function BooksEncode() {
     })();
   }, [prompt, paginationOffset]);
   const [activeDialog, setActiveDialog] = useState(null);
-  const [genre, setGenre] = useState("All Genre");
-  const [status, setStatus] = useState("All Status");
   const [books, setBooks] = useState([]);
   const [targetBook, setTargetBook] = useState("");
   const [targetCopy, setTargetCopy] = useState("");
@@ -84,16 +82,18 @@ function BooksEncode() {
         open={activeDialog === "add book"}
         onClose={() => setActiveDialog(null)}
         onCreate={async () => {
-          const books = await booksApi.getBooks(prompt);
-          setBooks(books);
+          const result = await booksApi.getBooks(prompt, paginationOffset);
+          setBooks(result.books);
+          setPaginationCount(result.totalPages);
         }}
       />
       <DeleteBookDialog
         open={activeDialog === "delete book"}
         onClose={() => setActiveDialog(null)}
         onDelete={async () => {
-          const books = await booksApi.getBooks(prompt);
-          setBooks(books);
+          const result = await booksApi.getBooks(prompt, paginationOffset);
+          setBooks(result.books);
+          setPaginationCount(result.totalPages);
           setTargetBook("");
         }}
         targetBook={targetBook}
@@ -131,8 +131,9 @@ function BooksEncode() {
           setTargetBook(book);
           const copies = await bookCopiesApi.getBookCopies(targetBook.book_id);
           setTargetBookCopies(copies);
-          const books = await booksApi.getBooks();
-          setBooks(books);
+          const result = await booksApi.getBooks(prompt, paginationOffset);
+          setBooks(result.books);
+          setPaginationCount(result.totalPages);
         }}
       />
       {/* Main container */}
@@ -192,29 +193,6 @@ function BooksEncode() {
               placeholder="Search by title, author, Book ID, or publisher..."
               onChange={(e) => setPrompt(e.target.value)}
             />
-            <Select
-              sx={{
-                bgcolor: "accent.secondary",
-                color: "text.primary",
-                minWidth: 120,
-              }}
-              value={genre}
-              onChange={(e) => setGenre(e.target.value)}
-            >
-              <MenuItem value="All Genre">All Genre</MenuItem>
-              <MenuItem value="Fiction">Fiction</MenuItem>
-              <MenuItem value="Science">Science</MenuItem>
-              <MenuItem value="History">History</MenuItem>
-            </Select>
-            <Select
-              sx={{ bgcolor: "accent.secondary", minWidth: 120 }}
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <MenuItem value="All Status">All Status</MenuItem>
-              <MenuItem value="Fiction">Available</MenuItem>
-              <MenuItem value="Science">Unavailable</MenuItem>
-            </Select>
           </Box>
 
           {/* Main frame for product cards */}
@@ -275,7 +253,7 @@ function BooksEncode() {
                 display: paginationCount === 0 ? "none" : "block",
                 alignItems: "center",
               }}
-              onChange={(e, page) => setPaginationOffset(page - 1)}
+              onChange={(e, page) => setPaginationOffset(page)}
             />
           </Box>
         </Box>

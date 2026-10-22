@@ -15,8 +15,10 @@ export async function getAllVisits() {
   if (!response.ok) throw new Error(data.message);
   return data;
 }
-export async function getWeeklyVisit({ year, month, week }) {
-  const params = new URLSearchParams({ year, month, week });
+export async function getWeeklyVisit({ weeksAgo = 0 } = {}) {
+  const params = new URLSearchParams({
+    weeksAgo: String(weeksAgo),
+  });
 
   const response = await fetch(
     `${BASE_URL}/visits/weekly?${params.toString()}`,

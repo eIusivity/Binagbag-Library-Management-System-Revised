@@ -43,8 +43,12 @@ function LandingPage() {
             justifyContent: "flex-end",
           }}
         >
-          <Button sx={{ bgcolor: "primary.main", color: "white" }}>
-            Open Account
+          <Button
+            component={NavLink}
+            to="/login"
+            sx={{ bgcolor: "primary.main", color: "white" }}
+          >
+            Sign In
           </Button>
           <IconButton sx={{ display: { md: "none" } }}>
             <MenuIcon sx={{ color: "primary.main" }} />

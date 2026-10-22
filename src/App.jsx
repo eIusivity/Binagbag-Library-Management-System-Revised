@@ -31,6 +31,7 @@ import Reports from "./pages/staff/Reports";
 import Catalog from "./pages/staff/Catalog";
 import BookProfile from "./pages/staff/BookProfile";
 import PendingUserLanding from "./pages/staff/Users/PendingUserLanding";
+import LibrarianManagement from "./pages/staff/LibrarianManagement";
 function App() {
   const { triggerSnackbar } = useSnackbar();
   useEffect(() => {
@@ -109,6 +110,10 @@ function App() {
           />
           <Route path="users/:id" element={<UserProfile />} />
           <Route path="/reports" element={<Reports />} />
+          <Route
+            path="/librarianManagement"
+            element={<LibrarianManagement />}
+          />
         </Route>
       </Routes>
     </>

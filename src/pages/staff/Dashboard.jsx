@@ -7,6 +7,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 
 import { BarChart } from "@mui/x-charts/BarChart";
@@ -30,27 +32,42 @@ function Dashboard() {
   const [mostBorrowedBooks, setMostBorrowedBooks] = useState([]);
   const [libraryVisits, setLibraryVisits] = useState([]);
   const [visitsError, setVisitsError] = useState("");
+  const [week, setWeek] = useState(0); //for library activity toggle
   async function loadHeaderContents() {
-    const activeLoansCount = await getAllLoans();
-    const reservationsCount = await getAllReservations();
-    const activeLoans = activeLoansCount.data.filter(
-      (loan) => loan.status === "Borrowed" || loan.status === "Overdue",
-    );
-    const overdueLoans = activeLoansCount.data.filter(
-      (loan) => loan.status === "Overdue",
-    );
-    const reservations = reservationsCount.data.filter(
-      (reserve) =>
-        reserve.status !== "Expired" &&
-        reserve.status !== "Picked Up" &&
-        reserve.status !== "Cancelled",
-    );
-    //get visits
-    const visits = await getVisitsToday();
-    setVisitsValue(visits.todaysVisits);
-    setActiveLoanValue(activeLoans.length);
-    setOverdueLoanValue(overdueLoans.length);
-    setReservationValue(reservations.length);
+    try {
+      const loans = await getAllLoans();
+
+      setActiveLoanValue(
+        loans.data.filter((loan) =>
+          ["Borrowed", "Overdue"].includes(loan.status),
+        ).length,
+      );
+
+      setOverdueLoanValue(
+        loans.data.filter((loan) => loan.status === "Overdue").length,
+      );
+    } catch (error) {
+      console.error("Failed to load loan counts:", error);
+    }
+
+    try {
+      const reservations = await getAllReservations();
+
+      setReservationValue(
+        reservations.data.filter((reservation) =>
+          ["Waiting", "Ready"].includes(reservation.status),
+        ).length,
+      );
+    } catch (error) {
+      console.error("Failed to load reservation count:", error);
+    }
+
+    try {
+      const visits = await getVisitsToday();
+      setVisitsValue(visits.todaysVisits);
+    } catch (error) {
+      console.error("Failed to load today's visits:", error);
+    }
   }
   async function loadMostBorrowedBooks() {
     try {
@@ -135,7 +152,7 @@ function Dashboard() {
     try {
       setVisitsError("");
 
-      const response = await getWeeklyVisit({ year: 2026, month: 10, week: 2 });
+      const response = await getWeeklyVisit({ weeksAgo: week });
 
       setLibraryVisits(response.data);
       console.log(response.data);
@@ -146,9 +163,12 @@ function Dashboard() {
   useEffect(() => {
     loadHeaderContents();
     loadRecentLoans();
-    loadLibraryVisits();
     loadMostBorrowedBooks();
   }, []);
+
+  useEffect(() => {
+    loadLibraryVisits();
+  }, [week]);
   const headerContents = [
     {
       label: "Visits Today",
@@ -318,9 +338,25 @@ function Dashboard() {
           </TableContainer>
         </Stack>
         <Box sx={{ p: 2, bgcolor: "white" }}>
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            Library Activity
-          </Typography>
+          <Stack direction="row">
+            <Typography variant="h6" sx={{ fontWeight: "bold", flex: 1 }}>
+              Library Activity
+            </Typography>
+            <ToggleButtonGroup
+              value={week}
+              exclusive
+              onChange={(_, value) => {
+                if (value !== null) setWeek(value);
+              }}
+            >
+              <ToggleButton value={0}>This Week</ToggleButton>
+              <ToggleButton value={1}>1 Week Ago</ToggleButton>
+              <ToggleButton value={2}>2 Weeks Ago</ToggleButton>
+              <ToggleButton value={3}>3 Weeks Ago</ToggleButton>
+              <ToggleButton value={4}>4 Weeks Ago</ToggleButton>
+            </ToggleButtonGroup>
+          </Stack>
+
           <BarChart
             dataset={libraryVisits}
             xAxis={[

@@ -25,7 +25,7 @@ export async function getVisitsToday(req, res) {
       `SELECT * from VISITS where date = CURDATE()`,
     );
     if (rows.length === 0) {
-      return res.status(400).json({
+      return res.status(200).json({
         todaysVisits: 0,
       });
     }
@@ -43,37 +43,35 @@ export async function getVisitsToday(req, res) {
 export async function getAllVisits(req, res) {}
 export async function getWeeklyVisit(req, res) {
   try {
-    const year = Number(req.query.year);
-    const month = Number(req.query.month);
-    const week = Number(req.query.week);
+    const rawWeeksAgo = req.query.weeksAgo ?? "0";
 
-    if (
-      !Number.isInteger(year) ||
-      year < 1000 ||
-      year > 9999 ||
-      !Number.isInteger(month) ||
-      month < 1 ||
-      month > 12 ||
-      !Number.isInteger(week) ||
-      week < 1 ||
-      week > 5
-    ) {
+    if (typeof rawWeeksAgo !== "string" || !/^[0-4]$/.test(rawWeeksAgo)) {
       return res.status(400).json({
-        message: "Provide a valid year, month, and week.",
+        message: "weeksAgo must be an integer from 0 to 4.",
       });
     }
 
-    // Find the first Monday, then advance to the selected week.
-    const monday = new Date(Date.UTC(year, month - 1, 1));
-    const daysUntilMonday = (1 - monday.getUTCDay() + 7) % 7;
+    const weeksAgo = Number(rawWeeksAgo);
 
-    monday.setUTCDate(1 + daysUntilMonday + (week - 1) * 7);
+    // Get today's calendar date in Philippine time.
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Manila",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    }).formatToParts(new Date());
 
-    if (monday.getUTCMonth() !== month - 1) {
-      return res.status(400).json({
-        message: "That week does not exist in the selected month.",
-      });
-    }
+    const getPart = (type) =>
+      Number(parts.find((part) => part.type === type).value);
+
+    // Use UTC methods for calendar arithmetic to avoid server timezone issues.
+    const monday = new Date(
+      Date.UTC(getPart("year"), getPart("month") - 1, getPart("day")),
+    );
+
+    const daysSinceMonday = (monday.getUTCDay() + 6) % 7;
+
+    monday.setUTCDate(monday.getUTCDate() - daysSinceMonday - weeksAgo * 7);
 
     const friday = new Date(monday);
     friday.setUTCDate(friday.getUTCDate() + 4);
@@ -88,14 +86,11 @@ export async function getWeeklyVisit(req, res) {
       [formatDate(monday), formatDate(friday)],
     );
 
-    // Include all five weekdays, even when a daily record is missing.
     const visitsByDate = new Map(
       rows.map((row) => [row.date, Number(row.total_visits)]),
     );
 
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-
-    const data = days.map((day, index) => {
+    const data = ["Mon", "Tue", "Wed", "Thu", "Fri"].map((day, index) => {
       const date = new Date(monday);
       date.setUTCDate(date.getUTCDate() + index);
 
