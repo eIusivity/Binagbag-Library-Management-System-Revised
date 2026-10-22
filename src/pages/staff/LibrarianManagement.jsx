@@ -23,6 +23,7 @@ function LibrarianManagement() {
   const [lmsId, setLmsId] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [librarians, setLibrarians] = useState([]);
+  const [loading, setLoading] = useState(false);
   async function loadLibrarians() {
     try {
       const { data, error } = await authClient.admin.listUsers({
@@ -46,6 +47,7 @@ function LibrarianManagement() {
   async function handleAssignation(e) {
     e.preventDefault();
     setErrorMessage("");
+    setLoading(true);
     try {
       const selectedUser = await getUserByLibraryID(lmsId.trim());
       if (!selectedUser?.user) {
@@ -64,6 +66,8 @@ function LibrarianManagement() {
       await loadLibrarians();
     } catch (error) {
       setErrorMessage(error.message || "Failed to assign librarian.");
+    } finally {
+      setLoading(false);
     }
   }
   useEffect(() => {
@@ -97,11 +101,12 @@ function LibrarianManagement() {
             Cancel
           </Button>
           <Button
+            disabled={loading}
             variant="contained"
             type="submit"
             sx={{ bgcolor: "accent.primary" }}
           >
-            Submit
+            {loading ? "Submitting..." : "Submit"}
           </Button>
         </DialogActions>
       </Dialog>
