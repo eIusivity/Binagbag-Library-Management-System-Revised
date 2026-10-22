@@ -72,19 +72,6 @@ function Users() {
       sublabel: "Review and manage pending user registrations.",
       to: "/users/pending",
     },
-    {
-      label: "Edit User Information",
-      icon: <EditOutlinedIcon sx={{ fontSize: 44 }} />,
-      sublabel:
-        "Update user details such as name, email, and other information.",
-      to: "/users/edit",
-    },
-    {
-      label: "Deactivate a User",
-      icon: <GppBadOutlinedIcon sx={{ fontSize: 44 }} />,
-      sublabel: "Close or Blacklist an account.",
-      to: "/users/deactivation",
-    },
   ];
   return (
     <Box sx={{ p: 2 }}>
