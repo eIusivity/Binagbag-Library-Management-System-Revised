@@ -7,7 +7,7 @@ import {
   administrator,
 } from "../../backend/auth/permission";
 export const authClient = createAuthClient({
-  baseURL: "http://192.168.1.6:5000",
+  baseURL: "https://binagbag-library-management-system.onrender.com",
   plugins: [
     adminClient({
       ac,
