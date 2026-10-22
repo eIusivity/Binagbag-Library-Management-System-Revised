@@ -28,7 +28,7 @@ function LibrarianManagement() {
       const { data, error } = await authClient.admin.listUsers({
         query: {
           filterField: "role",
-          filterValue: "librarian",
+          filterValue: "Librarian",
           filterOperator: "eq",
         },
       });
@@ -53,7 +53,7 @@ function LibrarianManagement() {
       }
       const { error } = await authClient.admin.setRole({
         userId: selectedUser.user.id,
-        role: "librarian",
+        role: "Librarian",
       });
       if (error) {
         setErrorMessage(error.message);

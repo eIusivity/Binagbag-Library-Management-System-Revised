@@ -33,16 +33,26 @@ export async function createNotification(notification) {
       `INSERT INTO notification_audience(notification_id,recipient_user_id,recipient_role) VALUES(?, ?, ?)`,
       [notificationId, audience?.user_id ?? null, audience?.role ?? null],
     );
-
+    if (action === "ACCOUNT_REGISTRATION" && audience.role === "Librarian") {
+      await connection.query(
+        `INSERT INTO notification_audience(
+      notification_id,
+      recipient_user_id,
+      recipient_role
+    ) VALUES (?, ?, ?)`,
+        [notificationId, null, "Administrator"],
+      );
+    } //Forgot to add admin as well, now admins and librarians will both be notified, basically: If it sees that the notification is intended for Librarians, create a subsequent audience record for Admins too
     await connection.commit();
 
-    getIO().to("Librarian").emit("snackbar", {
+    getIO().to("Librarian").to("Administrator").emit("snackbar", {
       title: notification.title,
       content: notification.content,
       severity: "info",
       action: "ACCOUNT_REGISTRATION",
     });
-    getIO().to("Librarian").emit("new-registration");
+
+    getIO().to("Librarian").to("Administrator").emit("new-registration");
     return {
       notification_id: notificationId,
       message: "Notification created successfully!",
