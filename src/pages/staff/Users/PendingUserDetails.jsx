@@ -41,10 +41,12 @@ function PendingUserDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { triggerSnackbar } = useSnackbar();
+  const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState(null);
   const [dialog, setDialog] = useState("");
   const [modifications, setModifications] = useState({});
   async function loadProfile() {
+    setLoading(true);
     const { data, error } = await authClient.admin.getUser({
       query: {
         id,
@@ -57,11 +59,14 @@ function PendingUserDetails() {
     }
 
     setProfile(data);
+    setLoading(false);
   }
   useEffect(() => {
     loadProfile();
   }, [id]);
-
+  if (loading) {
+    return <StateDialog title="Loading..." />;
+  }
   if (!profile) {
     return <StateDialog title="User not found!" />;
   }
