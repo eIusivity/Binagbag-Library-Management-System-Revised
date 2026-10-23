@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import { authClient } from "../../../auth/authClient";
 import HelpIcon from "@mui/icons-material/Help";
 import AccountCircleTwoToneIcon from "@mui/icons-material/AccountCircleTwoTone";
-import { CircularProgress } from "@mui/material";
+import PendingIcon from "@mui/icons-material/Pending";
 function UserSearch() {
   const [prompt, setPrompt] = useState("");
   const [userResults, setUserResults] = useState([]);
@@ -33,6 +33,7 @@ function UserSearch() {
         setUserResults([]);
         return;
       }
+      setLoading(true);
       const { data: users } = await authClient.admin.listUsers({
         query: {
           searchValue: prompt,
@@ -47,6 +48,7 @@ function UserSearch() {
       if (ignore) return;
       setUserResults(users?.users ?? []);
       setPaginationCount(Math.ceil(users.total / 9));
+      setLoading(false);
     }
     fetchUsers();
     return () => {
@@ -126,20 +128,13 @@ function UserSearch() {
             description="User results will display in the form of a card."
           />
         )}
-
         {loading && (
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <CircularProgress />
-          </Box>
+          <StateDialog
+            icon={<PendingIcon sx={{ fontSize: 85 }} />}
+            title="Loading..."
+            description="Fetching users..."
+          />
         )}
-
         {prompt.trim().length > 0 && !loading && userResults.length === 0 && (
           <StateDialog
             icon={<HelpIcon sx={{ fontSize: 85 }} />}
