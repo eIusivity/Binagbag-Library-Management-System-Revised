@@ -41,9 +41,11 @@ function UserProfile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [dialog, setDialog] = useState("");
+  const [loading, setLoading] = useState(false);
   const [userLibrarySummary, setUserLibrarySummary] = useState([]);
   useEffect(() => {
     async function loadProfile() {
+      setLoading(true);
       const { data, error } = await authClient.admin.getUser({
         query: {
           id,
@@ -54,17 +56,17 @@ function UserProfile() {
         console.log(error.message);
         return;
       }
-
-      console.log(data);
       setProfile(data);
       const librarySummary = await getUserProfileLibrarySummary(id);
       setUserLibrarySummary(librarySummary);
-      console.log(librarySummary);
+      setLoading(false);
     }
 
     loadProfile();
   }, [id]);
-
+  if (loading) {
+    return <StateDialog title="Loading user..." />;
+  }
   if (!profile) {
     return <StateDialog title="User not found!" />;
   }
