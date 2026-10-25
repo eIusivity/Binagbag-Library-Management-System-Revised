@@ -16,6 +16,8 @@ import reservationRoutes from "./routes/reservationRoutes.js";
 import visitRoutes from "./routes/visitRoutes.js";
 import catalogRoutes from "./routes/catalogRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import { startReservationCron } from "./jobs/reservationCron.js";
+import { startLoanCron } from "./jobs/loanCron.js";
 dotenv.config();
 
 const app = express();
@@ -49,3 +51,5 @@ app.get("/", (req, res) => {
 httpServer.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on port " + PORT);
 });
+startReservationCron();
+startLoanCron();
