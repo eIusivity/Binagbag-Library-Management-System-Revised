@@ -36,6 +36,7 @@ import {
 import { socket } from "../../../socket";
 import CustomTextField from "../../../components/CustomTextField";
 import StateDialog from "../../../components/StateDialog";
+import { incrementVisit } from "../../../api/visitsApi";
 
 function PendingUserDetails() {
   const navigate = useNavigate();
@@ -178,6 +179,8 @@ function PendingUserDetails() {
         ...modifications,
       },
     });
+    //if approved, count it as a visit
+    if (verdict === "approved") await incrementVisit();
     if (error) {
       triggerSnackbar({
         title: "Error",
