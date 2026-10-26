@@ -22,7 +22,7 @@ export async function incrementVisit(req, res) {
 export async function getVisitsToday(req, res) {
   try {
     const [rows] = await db.query(
-      `SELECT * from VISITS where date = CURDATE()`,
+      `SELECT COUNT(*) as total_visits from VISITS where date = CURDATE()`,
     );
     if (rows.length === 0) {
       return res.status(200).json({
