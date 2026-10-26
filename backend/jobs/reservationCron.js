@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { expireReservations } from "../services/reservationService.js";
+import { expireReservations } from "../services/expireReservation.js";
 
 export function startReservationCron() {
   cron.schedule(
