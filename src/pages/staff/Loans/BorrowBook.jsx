@@ -359,7 +359,10 @@ function BorrowBook() {
             direction="row"
             sx={{ justifyContent: "center", gap: 2, p: 1 }}
           >
-            <Button sx={{ bgcolor: "red", color: "white" }}>
+            <Button
+              sx={{ bgcolor: "red", color: "white" }}
+              onClick={() => setStep(1)}
+            >
               No, reassess the process
             </Button>
             <Button
