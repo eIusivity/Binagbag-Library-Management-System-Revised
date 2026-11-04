@@ -8,6 +8,8 @@ import {
   Card,
   CardContent,
   CardMedia,
+  MenuItem,
+  Select,
   Pagination,
 } from "@mui/material";
 import StateDialog from "../../../components/StateDialog";
@@ -96,6 +98,7 @@ function UserSearch() {
           }}
           onChange={(e) => {
             setPrompt(e.target.value);
+            setPaginationOffset(0);
           }}
         />
         <Select
