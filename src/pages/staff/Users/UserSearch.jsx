@@ -44,7 +44,11 @@ function UserSearch() {
       setLoading(true);
 
       try {
-        const users = await searchUser(prompt, paginationOffset / 9 + 1);
+        const users = await searchUser(
+          prompt,
+          paginationOffset / 9 + 1,
+          byActivity,
+        );
 
         if (ignore) return;
 
@@ -69,7 +73,7 @@ function UserSearch() {
     return () => {
       ignore = true;
     };
-  }, [prompt, paginationOffset]);
+  }, [prompt, paginationOffset, byActivity]);
   return (
     <Box
       sx={{
@@ -124,6 +128,7 @@ function UserSearch() {
         />
         <Select
           value={byActivity}
+          defaultValue={"All Users"}
           onChange={(e) => {
             setByActivity(e.target.value);
             setPaginationOffset(0);

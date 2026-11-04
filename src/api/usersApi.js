@@ -19,11 +19,14 @@ export async function getUser(id) {
   if (!response.ok) throw new Error("Failed to get user");
   return response.json();
 }
-export async function searchUser(search = "", page = 1) {
+export async function searchUser(search = "", page = 1, filter = "") {
   const params = new URLSearchParams();
 
   if (search.trim()) {
     params.set("search", search.trim());
+  }
+  if (filter.trim()) {
+    params.set("filter", filter.trim());
   }
   params.set("page", page.toString());
 

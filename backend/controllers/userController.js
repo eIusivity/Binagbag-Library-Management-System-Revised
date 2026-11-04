@@ -19,21 +19,44 @@ export async function getUserCount(req, res) {
 }
 export async function searchUsers(req, res) {
   try {
-    const { search = "", page = 1 } = req.query;
-    const limit = 9;
+    const { search = "", page = 1, filter = "" } = req.query;
+    const limit = 6;
     const offset = (Math.max(Number(page) || 1, 1) - 1) * limit;
 
-    // Fetch users according to the search input.
-    // No search (&&) means we return all users.
+    const condition =
+      filter === "Borrowers"
+        ? `AND EXISTS (
+             SELECT 1 FROM loan
+             WHERE loan.library_id = user.library_id
+             AND loan.status = 'Borrowed'
+           )`
+        : filter === "Reservees"
+          ? `AND EXISTS (
+               SELECT 1 FROM reservation
+               WHERE reservation.library_id = user.library_id
+               AND reservation.status NOT IN ('Cancelled', 'Expired', 'Picked Up')
+             )`
+          : filter === "With Overdue Borrows"
+            ? `AND EXISTS (
+                 SELECT 1 FROM loan
+                 WHERE loan.library_id = user.library_id
+                 AND loan.status = 'Overdue'
+               )`
+            : "";
+
+    // Fetch users according to search and activity filter.
     const [rows] = await db.query(
-      `SELECT name, id, library_id FROM user ${search.trim() && `WHERE name LIKE ?`} LIMIT ? OFFSET ?`,
-      [...(search.trim() ? [`%${search.trim()}%`] : []), limit, offset],
+      `SELECT name, id, library_id FROM user
+       WHERE name LIKE ? ${condition}
+       LIMIT ? OFFSET ?`,
+      [`%${search.trim()}%`, limit, offset],
     );
 
     // Count matching users for pagination.
     const [count] = await db.query(
-      `SELECT COUNT(*) AS total FROM user ${search.trim() && `WHERE name LIKE ?`}`,
-      [...(search.trim() ? [`%${search.trim()}%`] : [])],
+      `SELECT COUNT(*) AS total FROM user
+       WHERE name LIKE ? ${condition}`,
+      [`%${search.trim()}%`],
     );
 
     const total = count[0].total;
