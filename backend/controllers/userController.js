@@ -44,7 +44,14 @@ export async function searchUsers(req, res) {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error(error);
+    console.error("[searchUsers] Database or controller error:", {
+      message: error.message,
+      code: error.code,
+      sqlMessage: error.sqlMessage,
+      sqlState: error.sqlState,
+      stack: error.stack,
+    });
+
     res.status(500).json({
       message: "Failed to get users.",
     });
