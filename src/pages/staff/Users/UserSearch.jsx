@@ -32,19 +32,40 @@ function UserSearch() {
   const [paginationOffset, setPaginationOffset] = useState(0);
   useEffect(() => {
     let ignore = false;
+
     async function fetchUsers() {
       if (prompt.trim().length === 0) {
         setUserResults([]);
+        setPaginationCount(0);
+        setLoading(false);
         return;
       }
+
       setLoading(true);
-      const users = await searchUser(prompt, paginationOffset, byActivity);
-      if (ignore) return;
-      setUserResults(users?.users ?? []);
-      setPaginationCount(Math.ceil(users.total / 9));
-      setLoading(false);
+
+      try {
+        const users = await searchUser(prompt, paginationOffset / 6 + 1);
+
+        if (ignore) return;
+
+        setUserResults(users?.users ?? []);
+        setPaginationCount(users?.totalPages ?? 0);
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+
+        if (!ignore) {
+          setUserResults([]);
+          setPaginationCount(0);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
     }
+
     fetchUsers();
+
     return () => {
       ignore = true;
     };

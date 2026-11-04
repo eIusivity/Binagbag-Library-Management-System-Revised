@@ -20,7 +20,7 @@ export async function getUserCount(req, res) {
 export async function searchUsers(req, res) {
   try {
     const { search = "", page = 1 } = req.query;
-    const limit = 6;
+    const limit = 9;
     const offset = (Math.max(Number(page) || 1, 1) - 1) * limit;
 
     // Fetch users according to the search input.
