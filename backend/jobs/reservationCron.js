@@ -1,12 +1,12 @@
 import cron from "node-cron";
-import { expireReservations } from "../services/expireReservation.js";
+import { expireReservation } from "../services/expireReservation.js";
 
 export function startReservationCron() {
   cron.schedule(
     "0 0 * * *",
     async () => {
       try {
-        const affectedRows = await expireReservations();
+        const affectedRows = await expireReservation();
 
         console.log(
           `[Reservation Cron] Expired ${affectedRows} reservation(s).`,

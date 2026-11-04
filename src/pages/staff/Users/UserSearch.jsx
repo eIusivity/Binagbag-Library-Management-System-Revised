@@ -20,9 +20,11 @@ import { authClient } from "../../../auth/authClient";
 import HelpIcon from "@mui/icons-material/Help";
 import AccountCircleTwoToneIcon from "@mui/icons-material/AccountCircleTwoTone";
 import PendingIcon from "@mui/icons-material/Pending";
+import { searchUser } from "../../../api/usersApi";
 function UserSearch() {
   const [prompt, setPrompt] = useState("");
   const [userResults, setUserResults] = useState([]);
+  const [byActivity, setByActivity] = useState("");
   const [loading, setLoading] = useState(false);
   const [paginationCount, setPaginationCount] = useState(0);
   const [paginationOffset, setPaginationOffset] = useState(0);
@@ -34,17 +36,7 @@ function UserSearch() {
         return;
       }
       setLoading(true);
-      const { data: users } = await authClient.admin.listUsers({
-        query: {
-          searchValue: prompt,
-          searchField: "name",
-          searchOperator: "contains",
-          offset: paginationOffset,
-          limit: 9,
-          sortBy: "name",
-          sortDirection: "desc",
-        },
-      });
+      const users = await searchUser(prompt, paginationOffset, byActivity);
       if (ignore) return;
       setUserResults(users?.users ?? []);
       setPaginationCount(Math.ceil(users.total / 9));
@@ -81,30 +73,53 @@ function UserSearch() {
       <Typography variant="subtitle1" sx={{ letterSpacing: 2 }}>
         Search registered users in the library.
       </Typography>
-      <CustomTextField
-        fullWidth
-        debounce
-        placeholder="Search by name..."
-        sx={{
-          mt: 2,
-          "& .MuiOutlinedInput-root": {
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <CustomTextField
+          fullWidth
+          debounce
+          placeholder="Search by name..."
+          sx={{
+            mt: 2,
+            "& .MuiOutlinedInput-root": {
+              bgcolor: "#FFFFFF",
+              borderRadius: 2,
+            },
+          }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "primary.main" }} />
+                </InputAdornment>
+              ),
+            },
+          }}
+          onChange={(e) => {
+            setPrompt(e.target.value);
+          }}
+        />
+        <Select
+          value={byActivity}
+          onChange={(e) => {
+            setByActivity(e.target.value);
+            setPaginationOffset(0);
+          }}
+          sx={{
+            mt: 2,
+            height: 56,
+            minWidth: 190,
             bgcolor: "#FFFFFF",
             borderRadius: 2,
-          },
-        }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: "primary.main" }} />
-              </InputAdornment>
-            ),
-          },
-        }}
-        onChange={(e) => {
-          setPrompt(e.target.value);
-        }}
-      />
+            boxSizing: "border-box",
+          }}
+        >
+          <MenuItem value="">All Users</MenuItem>
+          <MenuItem value="Reservees">Reservees</MenuItem>
+          <MenuItem value="Borrowers">Borrowers</MenuItem>
+          <MenuItem value="With Overdue Borrows">With Overdue Borrows</MenuItem>
+        </Select>
+      </Stack>
+
       <Stack
         direction="row"
         useFlexGap

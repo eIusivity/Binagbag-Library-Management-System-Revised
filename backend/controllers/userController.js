@@ -17,7 +17,39 @@ export async function getUserCount(req, res) {
     });
   }
 }
+export async function searchUsers(req, res) {
+  try {
+    const { search = "", page = 1 } = req.query;
+    const limit = 6;
+    const offset = (Math.max(Number(page) || 1, 1) - 1) * limit;
 
+    // Fetch users according to the search input.
+    // No search (&&) means we return all users.
+    const [rows] = await db.query(
+      `SELECT name, id, library_id FROM user ${search.trim() && `WHERE name LIKE ?`} LIMIT ? OFFSET ?`,
+      [...(search.trim() ? [`%${search.trim()}%`] : []), limit, offset],
+    );
+
+    // Count matching users for pagination.
+    const [count] = await db.query(
+      `SELECT COUNT(*) AS total FROM user ${search.trim() && `WHERE name LIKE ?`}`,
+      [...(search.trim() ? [`%${search.trim()}%`] : [])],
+    );
+
+    const total = count[0].total;
+
+    res.json({
+      users: rows,
+      total: total,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to get users.",
+    });
+  }
+}
 export async function getUserByLibraryID(req, res) {
   try {
     const { libraryId } = req.params;

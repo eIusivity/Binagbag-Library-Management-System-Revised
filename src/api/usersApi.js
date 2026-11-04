@@ -19,6 +19,24 @@ export async function getUser(id) {
   if (!response.ok) throw new Error("Failed to get user");
   return response.json();
 }
+export async function searchUser(search = "", page = 1, filter = "") {
+  const params = new URLSearchParams();
+  if (search.trim()) {
+    params.set("search", search.trim());
+  }
+  if (filter.trim()) {
+    params.set("filter", search.trim());
+  }
+  params.set("page", page.toString());
+  const url = params.size
+    ? `${BASE_URL}/user/search?${params.toString()}`
+    : `${BASE_URL}/user/search`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Failed to load users");
+  }
+  return response.json();
+}
 export async function getUserByLibraryID(libraryid) {
   const response = await fetch(`${BASE_URL}/user/library/${libraryid}`);
   const data = await response.json();
