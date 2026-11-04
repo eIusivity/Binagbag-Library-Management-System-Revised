@@ -10,9 +10,10 @@ import {
 
 const router = express.Router();
 router.post("/register", createUser);
+router.get("/search", searchUsers);
 router.get("/:id", getUser);
 router.get("/library/:libraryId", getUserByLibraryID);
 router.get("/", getUserCount);
 router.get("/summary/:id", getUserProfileLibrarySummary);
-router.get("/search", searchUsers);
+
 export default router;

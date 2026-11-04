@@ -44,7 +44,7 @@ function UserSearch() {
       setLoading(true);
 
       try {
-        const users = await searchUser(prompt, paginationOffset / 6 + 1);
+        const users = await searchUser(prompt, paginationOffset / 9 + 1);
 
         if (ignore) return;
 

@@ -19,7 +19,6 @@ export async function getUserCount(req, res) {
 }
 export async function searchUsers(req, res) {
   try {
-    console.log("[SEARCH USERS] Controller reached");
     const { search = "", page = 1 } = req.query;
     const limit = 9;
     const offset = (Math.max(Number(page) || 1, 1) - 1) * limit;
@@ -45,12 +44,9 @@ export async function searchUsers(req, res) {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("[SEARCH USERS ERROR]", error);
-
+    console.error(error);
     res.status(500).json({
-      message: error.message,
-      code: error.code,
-      sqlMessage: error.sqlMessage,
+      message: "Failed to get users.",
     });
   }
 }
