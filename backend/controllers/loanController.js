@@ -181,14 +181,16 @@ export async function checkinLoan(req, res) {
 
       const returnDate = new Date();
       const isReturnLate = returnDate > new Date(loan.due_date);
-
+      const fineAmount =
+        (isReturnLate ? 10 : 0) + (returnCondition === "Defective" ? 30 : 0);
       await connection.query(
         `UPDATE loan
          SET return_date = ?,
              returned_by = ?,
              status = ?,
              is_return_late = ?,
-             return_condition = ?
+             return_condition = ?,
+             fine_amount = ?
          WHERE loan_id = ?`,
         [
           returnDate,
@@ -196,6 +198,7 @@ export async function checkinLoan(req, res) {
           "Returned",
           isReturnLate,
           returnCondition,
+          fineAmount,
           loanId,
         ],
       );
