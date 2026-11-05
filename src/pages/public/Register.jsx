@@ -28,7 +28,6 @@ function Register() {
   const [specificUserInformation, setSpecificUserInformation] = useState({});
   async function handleAccountCreation(e) {
     e.preventDefault();
-
     if (isRegistering) return;
 
     if (userInfo.password !== userInfo.confirm_password) {
@@ -39,46 +38,44 @@ function Register() {
     setIsRegistering(true);
 
     try {
-      const { data, error } = await authClient.signUp.email(
-        {
-          email: userInfo.email,
-          password: userInfo.password,
-          name: [userInfo.first_name, userInfo.middle_name, userInfo.last_name]
-            .filter(Boolean)
-            .join(" "),
-          user_type: userInfo.user_type,
-          first_name: userInfo.first_name,
-          middle_name: userInfo.middle_name ?? "",
-          last_name: userInfo.last_name,
-        },
-        {
-          onSuccess: async (ctx) => {
-            await insertUserTypeInformation({
-              userId: ctx.data.user.id,
-              userType: userInfo.user_type,
-              userTypeInformationObject: specificUserInformation,
-            });
-            await createNotification({
-              notification_type: "Account Registration",
-              title: "New Registration",
-              content: `${userInfo.first_name} ${userInfo.last_name} has registered an account. Please review their details.`,
-              reference_id: ctx.data.user.id,
-              action: "ACCOUNT_REGISTRATION",
-              audience: {
-                role: "Librarian",
-              },
-            });
-            navigate("/home");
-          },
-          onError: (ctx) => {
-            alert(ctx.error.message);
-          },
-        },
-      );
+      const { data, error } = await authClient.signUp.email({
+        email: userInfo.email,
+        password: userInfo.password,
+        name: [userInfo.first_name, userInfo.middle_name, userInfo.last_name]
+          .filter(Boolean)
+          .join(" "),
+        user_type: userInfo.user_type,
+        first_name: userInfo.first_name,
+        middle_name: userInfo.middle_name ?? "",
+        last_name: userInfo.last_name,
+      });
 
       if (error) {
         alert(error.message);
+        return;
       }
+
+      const userId = data.user.id;
+
+      await insertUserTypeInformation({
+        userId,
+        userType: userInfo.user_type,
+        userTypeInformationObject: specificUserInformation,
+      });
+
+      await createNotification({
+        notification_type: "Account Registration",
+        title: "New Registration",
+        content: `${userInfo.first_name} ${userInfo.last_name} has registered an account. Please review their details.`,
+        reference_id: userId,
+        action: "ACCOUNT_REGISTRATION",
+        audience: { role: "Librarian" },
+      });
+
+      navigate("/home");
+    } catch (err) {
+      console.error("Registration follow-up failed:", err);
+      alert(err.message);
     } finally {
       setIsRegistering(false);
     }
@@ -152,7 +149,7 @@ function Register() {
     },
   ];
   useEffect(() => {
-    setSpecificUserInformation(null);
+    setSpecificUserInformation({});
   }, [userInfo.user_type]);
   return (
     <Box
