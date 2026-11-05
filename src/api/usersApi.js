@@ -40,12 +40,12 @@ export async function searchUser(search = "", page = 1, filter = "") {
 export async function insertUserTypeInformation({
   userId,
   userType,
-  userTypeInfoObject,
+  userTypeInformationObject,
 }) {
   const response = await fetch(`${BASE_URL}/user/insertUserTypeInfo`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, userType, userTypeInfoObject }),
+    body: JSON.stringify({ userId, userType, userTypeInformationObject }),
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message);

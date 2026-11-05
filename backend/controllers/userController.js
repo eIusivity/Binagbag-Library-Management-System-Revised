@@ -80,6 +80,7 @@ export async function insertUserTypeInformation(req, res) {
         table: "student_information",
         idColumn: "lrn",
         columns: ["lrn", "section", "track", "grade"],
+        required: ["lrn", "section", "track", "grade"],
       },
 
       Faculty: {
@@ -91,24 +92,29 @@ export async function insertUserTypeInformation(req, res) {
           "position",
           "employment_type",
           "specialization",
-          "date_hired",
+        ],
+        required: [
+          "faculty_id",
+          "department",
+          "position",
+          "employment_type",
+          "specialization",
         ],
       },
 
       "Non-Faculty": {
         table: "non_faculty_information",
         idColumn: "employee_id",
-        columns: [
-          "employee_id",
-          "department",
-          "position",
-          "employment_type",
-          "date_hired",
-        ],
+        columns: ["employee_id", "department", "position", "employment_type"],
+        required: ["employee_id", "department", "position", "employment_type"],
       },
     };
     const { userId, userType, userTypeInformationObject } = req.body;
-
+    if (!userId) {
+      return res.status(400).json({
+        message: "User ID is required",
+      });
+    }
     // 1. Validate user type
     const target = userTypeTables[userType];
 

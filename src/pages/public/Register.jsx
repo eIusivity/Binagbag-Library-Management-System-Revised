@@ -54,9 +54,9 @@ function Register() {
         {
           onSuccess: async (ctx) => {
             await insertUserTypeInformation({
-              userId: data.user.id,
+              userId: ctx.data.user.id,
               userType: userInfo.user_type,
-              userTypeInfoObject: specificUserInformation,
+              userTypeInformationObject: specificUserInformation,
             });
             await createNotification({
               notification_type: "Account Registration",
