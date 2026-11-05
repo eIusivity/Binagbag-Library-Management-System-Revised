@@ -9,7 +9,7 @@ import {
   MenuItem,
   Link,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authClient } from "../../auth/authClient";
 import { NavLink, useNavigate } from "react-router-dom";
 import { createNotification } from "../../api/notifyApi";
@@ -19,11 +19,13 @@ import EmailIcon from "@mui/icons-material/Email";
 import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
 import CustomTextField from "../../components/CustomTextField";
 import { getImageUrl } from "../../api/imageFetcher";
+import { insertUserTypeInformation } from "../../api/usersApi";
 function Register() {
   const navigate = useNavigate();
   const [registrationPhase, setRegistrationPhase] = useState("registering");
   const [userInfo, setUserInfo] = useState({ user_type: "Student" });
   const [isRegistering, setIsRegistering] = useState(false);
+  const [specificUserInformation, setSpecificUserInformation] = useState({});
   async function handleAccountCreation(e) {
     e.preventDefault();
 
@@ -37,7 +39,7 @@ function Register() {
     setIsRegistering(true);
 
     try {
-      const { error } = await authClient.signUp.email(
+      const { data, error } = await authClient.signUp.email(
         {
           email: userInfo.email,
           password: userInfo.password,
@@ -51,6 +53,11 @@ function Register() {
         },
         {
           onSuccess: async (ctx) => {
+            await insertUserTypeInformation({
+              userId: data.user.id,
+              userType: userInfo.user_type,
+              userTypeInfoObject: specificUserInformation,
+            });
             await createNotification({
               notification_type: "Account Registration",
               title: "New Registration",
@@ -144,6 +151,9 @@ function Register() {
       values: ["password", "confirm_password"],
     },
   ];
+  useEffect(() => {
+    setSpecificUserInformation(null);
+  }, [userInfo.user_type]);
   return (
     <Box
       sx={{
@@ -319,6 +329,287 @@ function Register() {
                   </Box>
                 </Box>
               ))}
+              {userInfo.user_type === "Student" && (
+                <Box>
+                  <Divider textAlign="left" sx={{ mb: 2 }}>
+                    <Typography variant="subtitle1" fontWeight={700}>
+                      Student Information
+                    </Typography>
+                  </Divider>
+
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">LRN *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. 123456789012"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            lrn: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Section *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. STEM 12-A"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            section: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Track *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. STEM"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            track: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Grade *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        type="number"
+                        placeholder="e.g. 12"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            grade: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+                  </Box>
+                </Box>
+              )}
+              {userInfo.user_type === "Faculty" && (
+                <Box>
+                  <Divider textAlign="left" sx={{ mb: 2 }}>
+                    <Typography variant="subtitle1" fontWeight={700}>
+                      Faculty Information
+                    </Typography>
+                  </Divider>
+
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Faculty ID *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. FAC-0001"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            faculty_id: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Department *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="Enter department"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            department: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Position *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. Instructor"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            position: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Employment Type *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. Permanent"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            employment_type: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Specialization</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. Computer Science"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            specialization: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+                  </Box>
+                </Box>
+              )}
+              {userInfo.user_type === "Non-Faculty" && (
+                <Box>
+                  <Divider textAlign="left" sx={{ mb: 2 }}>
+                    <Typography variant="subtitle1" fontWeight={700}>
+                      Non-Faculty Information
+                    </Typography>
+                  </Divider>
+
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Employee ID *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. EMP-0001"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            employee_id: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Department *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="Enter department"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            department: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Position *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. Librarian"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            position: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+
+                    <Stack
+                      spacing={0.5}
+                      sx={{
+                        flex: { xs: "1 1 100%", md: "1 1 calc(50% - 8px)" },
+                      }}
+                    >
+                      <Typography variant="body2">Employment Type *</Typography>
+                      <CustomTextField
+                        fullWidth
+                        placeholder="e.g. Permanent"
+                        onChange={(e) =>
+                          setSpecificUserInformation((prev) => ({
+                            ...prev,
+                            employment_type: e.target.value,
+                          }))
+                        }
+                      />
+                    </Stack>
+                  </Box>
+                </Box>
+              )}
               <Button
                 type="submit"
                 fullWidth

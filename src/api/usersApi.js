@@ -37,6 +37,20 @@ export async function searchUser(search = "", page = 1, filter = "") {
 
   return response.json();
 }
+export async function insertUserTypeInformation({
+  userId,
+  userType,
+  userTypeInfoObject,
+}) {
+  const response = await fetch(`${BASE_URL}/user/insertUserTypeInfo`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, userType, userTypeInfoObject }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message);
+  return data;
+}
 export async function getUserByLibraryID(libraryid) {
   const response = await fetch(`${BASE_URL}/user/library/${libraryid}`);
   const data = await response.json();

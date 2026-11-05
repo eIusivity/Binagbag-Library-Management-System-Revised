@@ -73,6 +73,122 @@ export async function searchUsers(req, res) {
     });
   }
 }
+export async function insertUserTypeInformation(req, res) {
+  try {
+    const userTypeTables = {
+      Student: {
+        table: "student_information",
+        idColumn: "lrn",
+        columns: ["lrn", "section", "track", "grade"],
+      },
+
+      Faculty: {
+        table: "faculty_information",
+        idColumn: "faculty_id",
+        columns: [
+          "faculty_id",
+          "department",
+          "position",
+          "employment_type",
+          "specialization",
+          "date_hired",
+        ],
+      },
+
+      "Non-Faculty": {
+        table: "non_faculty_information",
+        idColumn: "employee_id",
+        columns: [
+          "employee_id",
+          "department",
+          "position",
+          "employment_type",
+          "date_hired",
+        ],
+      },
+    };
+    const { userId, userType, userTypeInformationObject } = req.body;
+
+    // 1. Validate user type
+    const target = userTypeTables[userType];
+
+    if (!target) {
+      return res.status(400).json({
+        message: "Invalid user type",
+      });
+    }
+
+    // 2. Validate information object
+    if (
+      !userTypeInformationObject ||
+      typeof userTypeInformationObject !== "object" ||
+      Array.isArray(userTypeInformationObject)
+    ) {
+      return res.status(400).json({
+        message: "Invalid user information",
+      });
+    }
+
+    // 3. Check required fields
+    const missingFields = target.required.filter(
+      (column) =>
+        userTypeInformationObject[column] === undefined ||
+        userTypeInformationObject[column] === null ||
+        userTypeInformationObject[column] === "",
+    );
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        message: "Missing required fields",
+        missingFields,
+      });
+    }
+
+    // 4. Prevent unexpected columns
+    const invalidFields = Object.keys(userTypeInformationObject).filter(
+      (column) => !target.columns.includes(column),
+    );
+
+    if (invalidFields.length > 0) {
+      return res.status(400).json({
+        message: "Invalid information fields",
+        invalidFields,
+      });
+    }
+
+    // 5. Construct columns and values
+    const columns = ["user_id", ...target.columns];
+
+    const values = [
+      userId,
+      ...target.columns.map(
+        (column) => userTypeInformationObject[column] ?? null,
+      ),
+    ];
+
+    // 6. Construct SQL query
+    const placeholders = columns.map(() => "?").join(", ");
+
+    const query = `
+      INSERT INTO ${target.table}
+      (${columns.join(", ")})
+      VALUES (${placeholders})
+    `;
+
+    // 7. Execute query
+    await db.query(query, values);
+
+    return res.status(201).json({
+      message: "User type information successfully inserted",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to insert user type information",
+    });
+  }
+}
 export async function getUserByLibraryID(req, res) {
   try {
     const { libraryId } = req.params;
