@@ -6,13 +6,39 @@ const emptyToNull = (value) => {
 export async function getBooks(req, res) {
   //Took my time to write this comment, so that in the future once I review this code again, I don't get daunted by the amount of ternary operators
   try {
-    const { search = "", page = 1 } = req.query;
+    const { search = "", page = 1, filter = "" } = req.query;
     const limit = 6;
     const offset = (Math.max(Number(page) || 1, 1) - 1) * limit; //Ensures that only numbers are sent on the params and it does not go below 1
-
+    let filterCondition = "";
+    if (filter === "borrow") {
+      filterCondition = `
+    AND EXISTS (
+      SELECT 1
+      FROM book_copies
+      WHERE book_copies.book_id = book_info.book_id
+      AND book_copies.status = 'Borrowed'
+    )
+  `;
+    } else if (filter === "reserve") {
+      filterCondition = `
+    AND EXISTS (
+      SELECT 1
+      FROM book_copies
+      WHERE book_copies.book_id = book_info.book_id
+      AND book_copies.status = 'Reserved'
+    )
+  `;
+    }
     //Here we grab the rows according to what the user searched, no search (&&) then we just return all the books
     const [rows] = await db.query(
-      `SELECT * FROM book_info WHERE deleted_at IS NULL ${search.trim() && `AND (title LIKE ? OR author LIKE ? OR book_id LIKE ?)`} LIMIT ? OFFSET ? `,
+      `
+  SELECT *
+  FROM book_info
+  WHERE deleted_at IS NULL
+  ${search.trim() ? `AND (title LIKE ? OR author LIKE ? OR book_id LIKE ?)` : ""}
+  ${filterCondition}
+  LIMIT ? OFFSET ?
+  `,
       [
         ...(search.trim()
           ? [`%${search.trim()}%`, `%${search.trim()}%`, `%${search.trim()}%`]
@@ -23,7 +49,13 @@ export async function getBooks(req, res) {
     );
     //We then grab how many books in total were fetched, this is necessary to create pagination and determine how many pagination buttons we must render
     const [count] = await db.query(
-      `SELECT COUNT(*) AS total FROM book_info WHERE deleted_at IS NULL ${search.trim() && `AND (title LIKE ? OR author LIKE ? OR book_id LIKE ?)`}`,
+      `
+  SELECT COUNT(*) AS total
+  FROM book_info
+  WHERE deleted_at IS NULL
+  ${search.trim() ? `AND (title LIKE ? OR author LIKE ? OR book_id LIKE ?)` : ""}
+  ${filterCondition}
+  `,
       [
         ...(search.trim()
           ? [`%${search.trim()}%`, `%${search.trim()}%`, `%${search.trim()}%`]

@@ -41,16 +41,21 @@ import { useState, useEffect } from "react";
 import ManageCopyBarcodes from "../../components/Dialogs/BooksEncode/ManageCopyBarcodes";
 function BooksEncode() {
   const [prompt, setPrompt] = useState("");
+  const [byActivity, setByActivity] = useState("");
   const [paginationCount, setPaginationCount] = useState(0);
   const [paginationOffset, setPaginationOffset] = useState(0);
   useEffect(() => {
     (async () => {
-      const books = await booksApi.getBooks(prompt, paginationOffset);
+      const books = await booksApi.getBooks(
+        prompt,
+        paginationOffset,
+        byActivity,
+      );
       setBooks(books.books);
       setPaginationCount(books.totalPages); //total pages of how many books were fetched, 6 books equal a page, not the actual pages of a literal book
       console.log(books.totalPages);
     })();
-  }, [prompt, paginationOffset]);
+  }, [prompt, paginationOffset, byActivity]);
   const [activeDialog, setActiveDialog] = useState(null);
   const [books, setBooks] = useState([]);
   const [targetBook, setTargetBook] = useState("");
@@ -193,6 +198,15 @@ function BooksEncode() {
               placeholder="Search by title, author, Book ID, or publisher..."
               onChange={(e) => setPrompt(e.target.value)}
             />
+            <Select
+              sx={{ bgcolor: "white" }}
+              defaultValue={""}
+              onChange={(e) => setByActivity(e.target.value)}
+            >
+              <MenuItem value="">No Filter</MenuItem>
+              <MenuItem value="borrow">With Borrows</MenuItem>
+              <MenuItem value="reserve">With Reserves</MenuItem>
+            </Select>
           </Box>
 
           {/* Main frame for product cards */}

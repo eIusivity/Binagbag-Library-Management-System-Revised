@@ -1,9 +1,12 @@
 import { BASE_URL } from "./apiConfig.js";
 
-export async function getBooks(search = "", page = 1) {
+export async function getBooks(search = "", page = 1, filter = "") {
   const params = new URLSearchParams();
   if (search.trim()) {
     params.set("search", search.trim());
+  }
+  if (filter.trim()) {
+    params.set("filter", filter.trim());
   }
   params.set("page", page.toString());
   const url = params.size
