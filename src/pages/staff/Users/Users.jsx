@@ -165,9 +165,8 @@ function Users() {
             </Button>
           );
         })}
-        {data?.user.role === "Administrator" && (
+        {data?.user?.role === "Administrator" && (
           <Button
-            key={i}
             component={NavLink}
             to="/librarianManagement"
             sx={{
