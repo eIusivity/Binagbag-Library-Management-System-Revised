@@ -165,7 +165,7 @@ function Users() {
             </Button>
           );
         })}
-        {data?.user.role === "Admin" && (
+        {data?.user.role === "Administrator" && (
           <Button
             key={i}
             component={NavLink}
