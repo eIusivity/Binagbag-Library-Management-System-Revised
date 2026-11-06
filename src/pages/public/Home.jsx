@@ -5,6 +5,7 @@ import StateDialog from "../../components/StateDialog";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import QRCode from "react-qr-code";
 import Logo from "../../assets/Logo.png";
+import { NavLink } from "react-router-dom";
 function Home() {
   const { data, isPending, error } = authClient.useSession();
   if (isPending) return null;
@@ -61,6 +62,15 @@ function Home() {
               Here's your digital library card.
             </Typography>
           </Box>
+
+          <Button
+            component={NavLink}
+            to="/catalog"
+            variant="contained"
+            sx={{ alignSelf: "flex-start" }}
+          >
+            Browse Catalog
+          </Button>
 
           {/* DIGITAL LIBRARY CARD */}
           <Stack

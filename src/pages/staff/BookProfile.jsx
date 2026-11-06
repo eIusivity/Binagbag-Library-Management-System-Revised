@@ -124,7 +124,10 @@ function BookProfile() {
     <Box
       sx={{ p: 2, display: "flex", flex: 1, gap: 2, flexDirection: "column" }}
     >
-      <Stack direction="row" sx={{ bgcolor: "white", p: 2, gap: 2 }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        sx={{ bgcolor: "white", p: { xs: 1.5, sm: 2 }, gap: 2 }}
+      >
         <Box sx={{ display: "flex", justifyContent: "center", mb: 0.5 }}>
           <Box
             sx={{
@@ -146,7 +149,7 @@ function BookProfile() {
               <Box
                 component="img"
                 src={bookIcon}
-                alt={title}
+                alt={book?.title ?? "Book cover"}
                 onError={() => setImageError(true)}
                 sx={{
                   width: "100%",
@@ -189,14 +192,17 @@ function BookProfile() {
         </Stack>
       </Stack>
       {/* Book Information and Library Summary */}
-      <Stack direction="row" spacing={2}>
+      <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
         <Stack sx={{ bgcolor: "white", flex: 1, p: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
             Book Information
           </Typography>
           {bookInformationValues.map((bookInformation) => {
             return (
-              <Stack direction="row">
+              <Stack
+                key={bookInformation.label}
+                direction={{ xs: "column", sm: "row" }}
+              >
                 <Typography sx={{ flex: 1 }}>
                   {bookInformation.label}
                 </Typography>
@@ -220,7 +226,10 @@ function BookProfile() {
           </Typography>
           {librarySummaryValues.map((summary) => {
             return (
-              <Stack direction="row">
+              <Stack
+                key={summary.label}
+                direction={{ xs: "column", sm: "row" }}
+              >
                 <Typography sx={{ flex: 1 }}>{summary.label}</Typography>
                 <Typography
                   sx={{
@@ -254,7 +263,7 @@ function BookProfile() {
             <TableBody>
               {bookCopies.map((copy) => {
                 return (
-                  <TableRow>
+                  <TableRow key={copy.copy_id}>
                     <TableCell>{copy.copy_id}</TableCell>
                     <TableCell>
                       <Chip

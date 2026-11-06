@@ -7,6 +7,7 @@ import PublicLayout from "./layout/PublicLayout";
 import StaffLayout from "./layout/StaffLayout";
 import GuestRoute from "./components/GuestRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { useAuth } from "./auth/AuthProvider";
 import BooksEncode from "./pages/staff/BooksEncode";
 import Register from "./pages/public/Register";
 import Login from "./pages/public/Login";
@@ -32,6 +33,12 @@ import Catalog from "./pages/staff/Catalog";
 import BookProfile from "./pages/staff/BookProfile";
 import PendingUserLanding from "./pages/staff/Users/PendingUserLanding";
 import LibrarianManagement from "./pages/staff/LibrarianManagement";
+
+function CatalogLayout() {
+  const { user } = useAuth();
+  return user?.role === "Patron" ? <PublicLayout /> : <StaffLayout />;
+}
+
 function App() {
   const { triggerSnackbar } = useSnackbar();
   useEffect(() => {
@@ -76,6 +83,20 @@ function App() {
           <Route path="/home" element={<Home />} />
         </Route>
 
+        {/* Catalog is shared by patrons and staff */}
+        <Route
+          element={
+            <ProtectedRoute
+              allowedRoles={["Patron", "Librarian", "Administrator"]}
+            >
+              <CatalogLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/catalog" element={<Catalog />} />
+          <Route path="/catalog/:bookId" element={<BookProfile />} />
+        </Route>
+
         {/* Staff */}
         <Route
           element={
@@ -92,8 +113,6 @@ function App() {
           <Route path="/users/deactivation" element={<DeactivateUser />} />
           <Route path="/users/pending" element={<PendingUserLanding />} />
           <Route path="/loans" element={<Loans />} />
-          <Route path="/catalog" element={<Catalog />} />
-          <Route path="/catalog/:bookId" element={<BookProfile />} />
           <Route path="/loans/borrow" element={<BorrowBook />} />
           <Route path="/loans/return" element={<ReturnBook />} />
           <Route path="/scanner" element={<QRBarcodeScanner />} />
