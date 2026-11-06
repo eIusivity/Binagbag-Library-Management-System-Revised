@@ -14,18 +14,18 @@ export async function getBooks(req, res) {
       filterCondition = `
     AND EXISTS (
       SELECT 1
-      FROM book_copies
-      WHERE book_copies.book_id = book_info.book_id
-      AND book_copies.status = 'Borrowed'
+      FROM book_copy
+      WHERE book_copy.book_id = book_info.book_id
+      AND book_copy.status = 'Borrowed'
     )
   `;
     } else if (filter === "reserve") {
       filterCondition = `
     AND EXISTS (
       SELECT 1
-      FROM book_copies
-      WHERE book_copies.book_id = book_info.book_id
-      AND book_copies.status = 'Reserved'
+      FROM book_copy
+      WHERE book_copy.book_id = book_info.book_id
+      AND book_copy.status = 'Reserved'
     )
   `;
     }
