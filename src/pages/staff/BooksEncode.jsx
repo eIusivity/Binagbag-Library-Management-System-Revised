@@ -200,10 +200,16 @@ function BooksEncode() {
             />
             <Select
               sx={{ bgcolor: "white" }}
-              defaultValue={""}
+              value={byActivity}
+              displayEmpty
               onChange={(e) => setByActivity(e.target.value)}
+              renderValue={(selected) => {
+                if (selected === "") return "No Filters";
+
+                return selected === "borrow" ? "With Borrows" : "With Reserves";
+              }}
             >
-              <MenuItem value="">No Filter</MenuItem>
+              <MenuItem value="">No Filters</MenuItem>
               <MenuItem value="borrow">With Borrows</MenuItem>
               <MenuItem value="reserve">With Reserves</MenuItem>
             </Select>

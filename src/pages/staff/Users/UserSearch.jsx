@@ -128,7 +128,8 @@ function UserSearch() {
         />
         <Select
           value={byActivity}
-          defaultValue={"All Users"}
+          displayEmpty
+          renderValue={(selected) => (selected === "" ? "All Users" : selected)}
           onChange={(e) => {
             setByActivity(e.target.value);
             setPaginationOffset(0);
