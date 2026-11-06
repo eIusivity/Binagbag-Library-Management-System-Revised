@@ -11,6 +11,7 @@ import { authClient } from "../../../auth/authClient";
 import { useEffect, useState } from "react";
 import { getUserCount } from "../../../api/usersApi";
 function Users() {
+  const { data } = authClient.useSession();
   const [userCount, setUserCount] = useState([]);
   useEffect(() => {
     async function loadCount() {
@@ -164,6 +165,35 @@ function Users() {
             </Button>
           );
         })}
+        {data?.user.role === "Admin" && (
+          <Button
+            key={i}
+            component={NavLink}
+            to="/librarianManagement"
+            sx={{
+              flex: 1,
+              p: 2,
+              gap: 2,
+              bgcolor: "#ffffff",
+              borderRadius: 4,
+              border: 1,
+              borderColor: "rgba(0,0,0,0.18)",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Stack>
+              <PeopleIcon />
+              <Stack>
+                <Typography align="left">Librarian Management</Typography>
+                <Typography align="left">
+                  Assign librarians in the system as an administrator.
+                </Typography>
+              </Stack>
+            </Stack>
+            <EastOutlinedIcon />
+          </Button>
+        )}
       </Stack>
     </Box>
   );
