@@ -10,7 +10,7 @@ import DevicesIcon from "@mui/icons-material/Devices";
 
 function StaffLayout() {
   const theme = useTheme();
-  const isSmallerThanLaptop = useMediaQuery(theme.breakpoints.down("lg"));
+  const isSmallerThanLaptop = useMediaQuery(theme.breakpoints.down("md"));
 
   if (isSmallerThanLaptop) {
     return (

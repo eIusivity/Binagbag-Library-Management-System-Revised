@@ -32,8 +32,9 @@ function LandingPage() {
             justifyContent: "center",
           }}
         >
-          <Button>Browse Catalog</Button>
-          <Button>Inquire</Button>
+          <Button component={NavLink} to="/catalog">
+            Browse Catalog
+          </Button>
         </Stack>
         <Stack
           direction="row"
@@ -90,6 +91,8 @@ function LandingPage() {
             activity.
           </Typography>
           <Button
+            component={NavLink}
+            to="/catalog"
             size="large"
             sx={{
               bgcolor: "primary.main",
